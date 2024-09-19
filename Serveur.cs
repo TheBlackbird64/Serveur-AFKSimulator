@@ -47,6 +47,7 @@ public class Serveur
             clientListe.Add(cli);
 
             cli.RecMessagesAsync();
+            Partie.ActualiserParties();
         }
     }
 }

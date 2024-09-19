@@ -10,7 +10,7 @@ public class Client
     private Socket sock;
     private Serveur serveur;
     public Partie? partie;
-    
+    private String msgpart = "";
 
     public int id { get; set; }
     public String pseudo { get; set; }
@@ -18,10 +18,12 @@ public class Client
     public int y { get; set; }
     public int vie { get; set; }
     public String couleur { get; set; }
+    public int tempsAfkMs;
 
     public const String sep1 = "|";
     public const String sep2 = ",";
     public const String sep3 = ";";
+    public const String sep4 = "!";
 
 
     public Client(Socket socket, int _id, Serveur serv)
@@ -36,8 +38,18 @@ public class Client
         y = 0;
         vie = 0;
         couleur = "000000";
+        tempsAfkMs = 0;
 
         Log("Client connecté");
+    }
+
+    public void ResetVars()
+    {
+        x = 0;
+        y = 0;
+        vie = 100;
+        couleur = "000000";
+        tempsAfkMs = 0;
     }
 
     public async void RecMessagesAsync()
@@ -59,7 +71,6 @@ public class Client
                     if (bytesRead > 0)
                     {
                         message += Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        
                     }
                     else
                     {
@@ -68,11 +79,26 @@ public class Client
                     }
                 }
 
-                String[] msgTab = message.Split(sep1);
-                foreach (string msg in msgTab)
+                // au cas ou le dernier message n'arrive pas complet, on garde ce qui est arrivé en mémoire pour le reconstituer
+                if (message != "")
                 {
-                    TraiterMessages(msg.Split(sep2));
+                    message = msgpart + message; 
+                    msgpart = "";
                 }
+
+                String[] msgTab = message.Split(sep1);
+                for (int i = 0; msgTab.Count() > i; i++)
+                {
+                    if ((i == msgTab.Count()-1) && (msgTab[i] != ""))
+                    {
+                        msgpart = msgTab[i];
+                    }
+                    else
+                    {
+                        TraiterMessages(msgTab[i].Split(sep2));
+                    }
+                }
+
             }
             catch (Exception e)
             {
@@ -81,26 +107,44 @@ public class Client
             }
         }
 
+        // Penser à supprimer l'objet et à l'effacer de toutes les listes dans lesquels il est présent
         serveur.clientListe.Remove(this);
         Log(serveur.clientListe.Count().ToString());
     }
 
     public void TraiterMessages(String[] msg)
     {
-        if (msg[0] == "j")
+        if (msg[0] == "j") // Jouer (mis en attente pour une partie
         {
             pseudo = msg[1];
             Partie.fileAttente.Add(this);
         }
-        else if (msg[0] == "a")
+        else if (msg[0] == "a") // Actualiser position et éventuellement tir
         {
+            x = int.Parse(msg[1]);
+            y = int.Parse(msg[2]);
 
+            if (msg[2] != "-1")
+            {
+                // lancer projectile
+            }
+        }
+        else if (msg[0] == "r") // Rejouer (aller dans la partie)
+        {
+            ResetVars();
         }
     }
 
     public void EnvoyerMessage(String msg)
     {
-        sock.Send(Encoding.UTF8.GetBytes(msg + sep1));
+        try
+        {
+            sock.Send(Encoding.UTF8.GetBytes(msg + sep1));
+        } catch 
+        {
+            // Erreur à gérer, déconnexion du client
+        }
+        
     }
 
     public void Log(String msg)
