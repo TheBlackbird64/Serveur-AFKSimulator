@@ -11,10 +11,12 @@ public class Partie
     public static int actualiserIntervalleMs = 50;
 
     public List<Client> listeJoueurs { get; set; }
+    public List<Projectile> listeProjectile { get; set; }
     public int nbJoueurs { get { return listeJoueurs.Count; } }
     public int graine { get; set; }
     public bool started { get; set; }
     public Stopwatch chrono;
+
 
 
     public static void ActualiserParties()

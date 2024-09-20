@@ -98,7 +98,6 @@ public class Client
                         TraiterMessages(msgTab[i].Split(sep2));
                     }
                 }
-
             }
             catch (Exception e)
             {
@@ -107,14 +106,23 @@ public class Client
             }
         }
 
-        // Penser à supprimer l'objet et à l'effacer de toutes les listes dans lesquels il est présent
+        SupprimerClient();
+    }
+
+    public void SupprimerClient()
+    {
+        // Vider les listes contenant le client
         serveur.clientListe.Remove(this);
+        if (partie.fileAttente.Contains(this)) { partie.fileAttente.Remove(this); }
+        if (partie.listeJoueurs.Contains(this)) { partie.listeJoueurs.Remove(this); }
+
+        sock.Close();
         Log(serveur.clientListe.Count().ToString());
     }
 
     public void TraiterMessages(String[] msg)
     {
-        if (msg[0] == "j") // Jouer (mis en attente pour une partie
+        if (msg[0] == "j") // Jouer (mis en attente pour une partie)
         {
             pseudo = msg[1];
             Partie.fileAttente.Add(this);
@@ -142,7 +150,9 @@ public class Client
             sock.Send(Encoding.UTF8.GetBytes(msg + sep1));
         } catch 
         {
-            // Erreur à gérer, déconnexion du client
+            // Erreur lors de l'envoi d'un message au client, déconnexion du client
+            connecte = false;
+            SupprimerClient();
         }
         
     }
