@@ -6,7 +6,7 @@ using System.Net;
 public class Serveur
 {
     private Socket listener;
-    public List<Client> clientListe { get; set; }
+    public List<Joueur> joueurListe { get; set; }
 
     public Serveur(int port, int maxConnexions)
     {
@@ -18,7 +18,7 @@ public class Serveur
         listener.Bind(localEndPoint);
         listener.Listen(maxConnexions);
 
-        clientListe = new List<Client>();
+        joueurListe = new List<Joueur>();
     }
 
     public async Task Start()
@@ -34,7 +34,7 @@ public class Serveur
             {
                 idClient++;
                 existe = true;
-                foreach (Client c in clientListe)
+                foreach (Joueur c in joueurListe)
                 {
                     if (c.id == idClient)
                     {
@@ -43,8 +43,8 @@ public class Serveur
                 }
             }
 
-            Client cli = new Client(await listener.AcceptAsync(), idClient, this);
-            clientListe.Add(cli);
+            Joueur cli = new Client(await listener.AcceptAsync(), idClient, this);
+            joueurListe.Add(cli);
 
             cli.RecMessagesAsync();
             Partie.ActualiserParties();

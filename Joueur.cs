@@ -4,7 +4,7 @@ using System.Text;
 
 
 
-public class Client
+public class Joueur
 {
 
     private Socket sock;
@@ -25,8 +25,7 @@ public class Client
     public const String sep3 = ";";
     public const String sep4 = "!";
 
-
-    public Client(Socket socket, int _id, Serveur serv)
+    public Joueur(Socket socket, int _id, Serveur serv)
     {
         
         sock = socket;
@@ -112,12 +111,12 @@ public class Client
     public void SupprimerClient()
     {
         // Vider les listes contenant le client
-        serveur.clientListe.Remove(this);
+        serveur.joueurListe.Remove(this);
         if (partie.fileAttente.Contains(this)) { partie.fileAttente.Remove(this); }
         if (partie.listeJoueurs.Contains(this)) { partie.listeJoueurs.Remove(this); }
 
         sock.Close();
-        Log(serveur.clientListe.Count().ToString());
+        Log(serveur.joueurListe.Count().ToString());
     }
 
     public void TraiterMessages(String[] msg)

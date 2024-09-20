@@ -5,12 +5,12 @@ using System.Diagnostics;
 public class Partie
 {
     public static List<Partie> parties = new List<Partie>();
-    public static List<Client> fileAttente = new List<Client>();
+    public static List<Joueur> fileAttente = new List<Joueur>();
     public static int nbJoueursMin = 5;
     public static int nbJoueursMax = 10;
     public static int actualiserIntervalleMs = 50;
 
-    public List<Client> listeJoueurs { get; set; }
+    public List<Joueur> listeJoueurs { get; set; }
     public List<Projectile> listeProjectile { get; set; }
     public int nbJoueurs { get { return listeJoueurs.Count; } }
     public int graine { get; set; }
@@ -54,7 +54,7 @@ public class Partie
 
     public Partie()
     {
-        listeJoueurs = new List<Client>();
+        listeJoueurs = new List<Joueur>();
         Random rnd = new Random();
         graine = rnd.Next(1000, 9999);
         chrono = new Stopwatch();
@@ -64,10 +64,10 @@ public class Partie
     public void Start()
     {
         started = true;
-        foreach (Client client in listeJoueurs)
+        foreach (Joueur client in listeJoueurs)
         {
             client.partie = this;
-            client.EnvoyerMessage(string.Join(Client.sep2, ["p", graine.ToString(), client.id])); // Message de lancement de la partie
+            client.EnvoyerMessage(string.Join(Joueur.sep2, ["p", graine.ToString(), client.id])); // Message de lancement de la partie
         }
 
         Console.WriteLine("-- Partie démarrée (" + parties.Count + " parties en cours)");
@@ -82,18 +82,18 @@ public class Partie
             chrono.Reset();
 
             String infosJoueurs = "";
-            foreach (Client c in listeJoueurs)
+            foreach (Joueur c in listeJoueurs)
             {
-                infosJoueurs += string.Join(Client.sep4, [c.id.ToString(), c.pseudo, c.x.ToString(), c.y.ToString(), c.vie.ToString(), c.couleur.ToString()]) + Client.sep3;
+                infosJoueurs += string.Join(Joueur.sep4, [c.id.ToString(), c.pseudo, c.x.ToString(), c.y.ToString(), c.vie.ToString(), c.couleur.ToString()]) + Joueur.sep3;
             }
 
-            foreach (Client c in listeJoueurs)
+            foreach (Joueur c in listeJoueurs)
             {
 
 
-                c.EnvoyerMessage(string.Join(Client.sep2, ["a", c.tempsAfkMs, infosJoueurs])); // Message d'actualisation pour synchroniser les clients
+                c.EnvoyerMessage(string.Join(Joueur.sep2, ["a", c.tempsAfkMs, infosJoueurs])); // Message d'actualisation pour synchroniser les clients
             }
-
+            
             chrono.Start();
         }
     }
