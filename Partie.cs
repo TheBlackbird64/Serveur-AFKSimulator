@@ -10,44 +10,61 @@ public class Partie
     public static int nbJoueursMax = 10;
     public static int actualiserIntervalleMs = 50;
 
+    public object lockObj { get; set; } = new object();
     public List<Joueur> listeJoueurs { get; set; }
     public List<Projectile> listeProjectile { get; set; }
     public int nbJoueurs { get { return listeJoueurs.Count; } }
     public int graine { get; set; }
     public bool started { get; set; }
-    public Stopwatch chrono;
 
 
-
-    public static void ActualiserParties()
+    // Boucle asynchrone qui place les joueurs de la file d'attente dans les parties incompletes, crée les parties si nécéssaire et actualise les parties existantes.
+    public static async void ActualiserPartiesAsync()
     {
-        // Créer une partie si la file d'attente est longue
-        if (fileAttente.Count >= nbJoueursMin)
+        while (true)
         {
-            Partie p = new Partie();
-            parties.Add(p);
-        }
+            await Task.Delay(actualiserIntervalleMs);
 
-        // Remplit les parties en cours
-        foreach (Partie p in parties)
-        {
-            while ((p.nbJoueurs < nbJoueursMax) && (fileAttente.Count > 0))
+            // Supprimer les joueurs déconnectés file d'attente
+            foreach (Joueur j in new List<Joueur>(fileAttente))
             {
-                int lastPos = fileAttente.Count - 1;
-                p.listeJoueurs.Add(fileAttente[lastPos]);
-                fileAttente.RemoveAt(lastPos);
+                if (j.suppr) { Partie.fileAttente.Remove(j); }
             }
+            
 
-            if ((p.listeJoueurs.Count >= nbJoueursMin) && ! p.started)
+            // Créer une partie si la file d'attente est longue
+            if (fileAttente.Count >= nbJoueursMin)
             {
-                p.Start();
+                Partie p = new Partie();
+                parties.Add(p);
             }
-        }
+            
+            foreach (Partie p in parties)
+            {
+                // Actualise chaque parties
+                if (p.started)
+                {
+                    p.Actualiser();
+                }
 
-        // Actualise les parties en cours
-        foreach (Partie p in parties)
-        {
-            p.Actualiser();
+                // Remplit les parties en cours
+                while ((p.nbJoueurs < nbJoueursMax) && (fileAttente.Count > 0))
+                {
+                    p.listeJoueurs.Add(fileAttente[0]);
+                    fileAttente.RemoveAt(0);
+                }
+                // Demarre les parties remplies
+                if ((p.listeJoueurs.Count >= nbJoueursMin) && !p.started)
+                {
+                    p.Start();
+                }
+
+                // Supprimer les joueurs déconnectés dans les parties
+                foreach (Joueur j in new List<Joueur> (p.listeJoueurs))
+                {
+                    if (j.suppr) { p.listeJoueurs.Remove(j); }
+                }
+            }
         }
     }
 
@@ -55,12 +72,13 @@ public class Partie
     public Partie()
     {
         listeJoueurs = new List<Joueur>();
+        listeProjectile = new List<Projectile>();
+
         Random rnd = new Random();
         graine = rnd.Next(1000, 9999);
-        chrono = new Stopwatch();
-        chrono.Start();
     }
 
+    // Commence une partie, prévient les clients du début de la partie
     public void Start()
     {
         started = true;
@@ -73,28 +91,34 @@ public class Partie
         Console.WriteLine("-- Partie démarrée (" + parties.Count + " parties en cours)");
     }
 
+    // Actualisation de toute la map (positions, vies, ..)
     public void Actualiser()
     {
-        // Actualisation de toute la map (positions, vies, ..)
-        if (chrono.ElapsedMilliseconds > actualiserIntervalleMs)
+        // Actualisation des ElementMap 
+        // Pour optimiser, l'actualisation des objets se fait dans la même boucle que celle qui sert à récupérer les infos pour l'actualisation
+
+        string infosProjectiles = "";
+        foreach (Projectile p in listeProjectile)
         {
-            chrono.Stop();
-            chrono.Reset();
+            p.Actualiser();
+            infosProjectiles += string.Join(Joueur.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString()]) + Joueur.sep3;
+        }
 
-            String infosJoueurs = "";
-            foreach (Joueur c in listeJoueurs)
+        // Envoi du message d'actualisation pour les clients : Construction du message
+        string infosJoueurs = "";
+        foreach (Joueur j in listeJoueurs)
+        {
+            j.Actualiser(); // Actualisation
+            infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur.ToString()]) + Joueur.sep3;
+        }
+
+        // Envoi
+        lock (lockObj)
+        {
+            foreach (Joueur j in listeJoueurs)
             {
-                infosJoueurs += string.Join(Joueur.sep4, [c.id.ToString(), c.pseudo, c.x.ToString(), c.y.ToString(), c.vie.ToString(), c.couleur.ToString()]) + Joueur.sep3;
+                j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs, infosJoueurs, infosProjectiles])); // Message d'actualisation pour synchroniser les clients
             }
-
-            foreach (Joueur c in listeJoueurs)
-            {
-
-
-                c.EnvoyerMessage(string.Join(Joueur.sep2, ["a", c.tempsAfkMs, infosJoueurs])); // Message d'actualisation pour synchroniser les clients
-            }
-            
-            chrono.Start();
         }
     }
 }

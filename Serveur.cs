@@ -24,30 +24,17 @@ public class Serveur
     public async Task Start()
     {
         Console.WriteLine(" -------------- Serveur démarré -------------- \n\n");
+        
+        
+        Partie.ActualiserPartiesAsync();
 
         while (true)
         {
-            // Trouve un identifiant qui n'est pas déjà utilisé par un client
-            int idClient = 0;
-            bool existe = false;
-            while (!existe)
-            {
-                idClient++;
-                existe = true;
-                foreach (Joueur c in joueurListe)
-                {
-                    if (c.id == idClient)
-                    {
-                        existe = false;
-                    }
-                }
-            }
 
-            Joueur cli = new Client(await listener.AcceptAsync(), idClient, this);
+            Joueur cli = new Joueur(await listener.AcceptAsync(), ElementMap.TrouverIdDispo(new List<ElementMap> (joueurListe)), this);
             joueurListe.Add(cli);
 
             cli.RecMessagesAsync();
-            Partie.ActualiserParties();
         }
     }
 }

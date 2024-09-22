@@ -1,29 +1,43 @@
-using Math;
 
-public class Projectile
+
+public class Projectile : ElementMap
 {
     public int idJoueur { get; set; }
-    public int idProjectile { get; set; }
-    public int x { get; set; }
-    public int y { get; set; }
     public int direction { get; set; }
-    public int vitesse = 5;
+    public int vitesse { get; set; } = 5;
+    public int degats { get; set; } = 5;
+    public Partie partie { get; set; }
 
 
-    public Projectile(int x, int y, int idJoueur, int idProjectile, int direction)
+    public Projectile(int id, int x, int y, int idJoueur, int direction, Partie partie) : base(id, x, y)
     {
-        this.x = x;
-        this.y = y;
         this.idJoueur = idJoueur;
-        this.idProjectile = idProjectile;
         this.direction = direction;
+        this.partie = partie;
     }
 
-    public ActualiserProjectile()
+    public override void Actualiser()
     {
-        x = x + Math.Cos(direction) * vitesse;
-        y = y + Math.Sin(direction) * vitesse;
+        x = x + Convert.ToInt32(Math.Round(Math.Cos(direction))) * vitesse;
+        y = y + Convert.ToInt32(Math.Round(Math.Sin(direction))) * vitesse;
+
+        // On gère les dégats quand il y a une collision avec un des joueurs, sauf celui qui a lancé le projectile sinon il est touché à la création du projectile (variable idJoueur)
+        foreach (Joueur j in partie.listeJoueurs)
+        {
+            if (idJoueur != j.id)
+            {
+                if (Collision(this, j))
+                {
+                    j.vie -= degats;
+                    SupprimerProjectile();
+                    break;
+                }
+            }
+        }
     }
 
-
+    public void SupprimerProjectile()
+    {
+        partie.listeProjectile.Remove(this);
+    }
 }

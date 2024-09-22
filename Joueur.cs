@@ -1,40 +1,37 @@
 using System;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Text;
 
 
 
-public class Joueur
+public class Joueur : ElementMap
 {
 
     private Socket sock;
     private Serveur serveur;
     public Partie? partie;
-    private String msgpart = "";
+    private string msgpart = "";
 
-    public int id { get; set; }
-    public String pseudo { get; set; }
-    public int x { get; set; }
-    public int y { get; set; }
+    public string pseudo { get; set; }
     public int vie { get; set; }
-    public String couleur { get; set; }
-    public int tempsAfkMs;
+    public string couleur { get; set; }
+    public int tempsAfkMs { get; set; }
+    public bool connecte { get; set; } = true;
+    public bool suppr { get; set; } = false;
+    
+    public const string sep1 = "|";
+    public const string sep2 = ",";
+    public const string sep3 = ";";
+    public const string sep4 = "!";
 
-    public const String sep1 = "|";
-    public const String sep2 = ",";
-    public const String sep3 = ";";
-    public const String sep4 = "!";
-
-    public Joueur(Socket socket, int _id, Serveur serv)
+    public Joueur(Socket socket, int _id, Serveur serv) : base(_id, 0, 0)
     {
         
         sock = socket;
         serveur = serv;
 
-        id = _id;
         pseudo = "";
-        x = 0;
-        y = 0;
         vie = 0;
         couleur = "000000";
         tempsAfkMs = 0;
@@ -53,8 +50,6 @@ public class Joueur
 
     public async void RecMessagesAsync()
     {
-        bool connecte = true;
-
         while (connecte)
         {
             byte[] buffer = new byte[1024];
@@ -85,7 +80,7 @@ public class Joueur
                     msgpart = "";
                 }
 
-                String[] msgTab = message.Split(sep1);
+                string[] msgTab = message.Split(sep1);
                 for (int i = 0; msgTab.Count() > i; i++)
                 {
                     if ((i == msgTab.Count()-1) && (msgTab[i] != ""))
@@ -110,13 +105,28 @@ public class Joueur
 
     public void SupprimerClient()
     {
-        // Vider les listes contenant le client
+        // Vider les listes pouvant contenir le client
+        suppr = true;
         serveur.joueurListe.Remove(this);
-        if (partie.fileAttente.Contains(this)) { partie.fileAttente.Remove(this); }
-        if (partie.listeJoueurs.Contains(this)) { partie.listeJoueurs.Remove(this); }
-
+        
         sock.Close();
-        Log(serveur.joueurListe.Count().ToString());
+        if (partie != null) {
+            lock (partie.lockObj)
+            {
+                
+            }
+        }
+        else
+        {
+            
+            
+            if (partie != null)
+            {
+                if (partie.listeJoueurs.Contains(this)) { partie.listeJoueurs.Remove(this); }
+            }
+
+            
+        }
     }
 
     public void TraiterMessages(String[] msg)
@@ -124,17 +134,26 @@ public class Joueur
         if (msg[0] == "j") // Jouer (mis en attente pour une partie)
         {
             pseudo = msg[1];
-            Partie.fileAttente.Add(this);
+            if ((! Partie.fileAttente.Contains(this)) && partie == null)
+            {
+                Partie.fileAttente.Add(this);
+            }
         }
         else if (msg[0] == "a") // Actualiser position et éventuellement tir
         {
-            x = int.Parse(msg[1]);
-            y = int.Parse(msg[2]);
-
-            if (msg[2] != "-1")
+            if (partie != null && partie.started)
             {
-                // lancer projectile
+                x = int.Parse(msg[1]);
+                y = int.Parse(msg[2]);
+
+                // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
+                // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
+                if (msg[3] != "-1")
+                {
+                    partie.listeProjectile.Add(new Projectile(ElementMap.TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, int.Parse(msg[3]), partie));
+                }
             }
+            
         }
         else if (msg[0] == "r") // Rejouer (aller dans la partie)
         {
@@ -149,11 +168,18 @@ public class Joueur
             sock.Send(Encoding.UTF8.GetBytes(msg + sep1));
         } catch 
         {
-            // Erreur lors de l'envoi d'un message au client, déconnexion du client
-            connecte = false;
-            SupprimerClient();
+            // Erreur lors de l'envoi d'un message au client, pas de déconnexion du client car cela risque de modifier une liste pendant son itération dans une boucle
         }
         
+    }
+
+    public override void Actualiser()
+    {
+        // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
+        // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
+
+        // Calcul du temps AFK
+
     }
 
     public void Log(String msg)
