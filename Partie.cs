@@ -50,13 +50,23 @@ public class Partie
                 // Remplit les parties en cours
                 while ((p.nbJoueurs < nbJoueursMax) && (fileAttente.Count > 0))
                 {
-                    p.listeJoueurs.Add(fileAttente[0]);
+                    Joueur j = fileAttente[0];
+                    p.listeJoueurs.Add(j);
                     fileAttente.RemoveAt(0);
+
+                    if (p.started) { p.StartClient(j); }
                 }
+
                 // Demarre les parties remplies
                 if ((p.listeJoueurs.Count >= nbJoueursMin) && !p.started)
                 {
-                    p.Start();
+                    p.started = true;
+                    Console.WriteLine("-- Partie démarrée (" + parties.Count + " parties en cours)");
+
+                    foreach (Joueur j in p.listeJoueurs)
+                    {
+                        p.StartClient(j);
+                    }
                 }
 
                 // Supprimer les joueurs déconnectés dans les parties
@@ -79,16 +89,11 @@ public class Partie
     }
 
     // Commence une partie, prévient les clients du début de la partie
-    public void Start()
+    public void StartClient(Joueur j)
     {
-        started = true;
-        foreach (Joueur client in listeJoueurs)
-        {
-            client.partie = this;
-            client.EnvoyerMessage(string.Join(Joueur.sep2, ["p", graine.ToString(), client.id])); // Message de lancement de la partie
-        }
-
-        Console.WriteLine("-- Partie démarrée (" + parties.Count + " parties en cours)");
+        // prévient les clients du début de la partie
+        j.partie = this;
+        j.EnvoyerMessage(string.Join(Joueur.sep2, ["p", graine.ToString(), j.id])); // Message de lancement de la partie
     }
 
     // Actualisation de toute la map (positions, vies, ..)
@@ -113,12 +118,9 @@ public class Partie
         }
 
         // Envoi
-        lock (lockObj)
+        foreach (Joueur j in listeJoueurs)
         {
-            foreach (Joueur j in listeJoueurs)
-            {
-                j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs, infosJoueurs, infosProjectiles])); // Message d'actualisation pour synchroniser les clients
-            }
+            j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs, infosJoueurs, infosProjectiles])); // Message d'actualisation pour synchroniser les clients
         }
     }
 }

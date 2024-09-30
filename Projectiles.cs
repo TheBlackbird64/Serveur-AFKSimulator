@@ -1,5 +1,4 @@
 
-
 public class Projectile : ElementMap
 {
     public int idJoueur { get; set; }
@@ -18,8 +17,9 @@ public class Projectile : ElementMap
 
     public override void Actualiser()
     {
-        x = x + Convert.ToInt32(Math.Round(Math.Cos(direction))) * vitesse;
-        y = y + Convert.ToInt32(Math.Round(Math.Sin(direction))) * vitesse;
+        
+        x = x + Convert.ToInt32(Math.Round(Math.Cos((double) direction * (Math.PI / 180.0)))) * vitesse;
+        y = y + Convert.ToInt32(Math.Round(Math.Sin((double) direction * (Math.PI / 180.0)))) * vitesse;
 
         // On gère les dégats quand il y a une collision avec un des joueurs, sauf celui qui a lancé le projectile sinon il est touché à la création du projectile (variable idJoueur)
         foreach (Joueur j in partie.listeJoueurs)

@@ -110,23 +110,6 @@ public class Joueur : ElementMap
         serveur.joueurListe.Remove(this);
         
         sock.Close();
-        if (partie != null) {
-            lock (partie.lockObj)
-            {
-                
-            }
-        }
-        else
-        {
-            
-            
-            if (partie != null)
-            {
-                if (partie.listeJoueurs.Contains(this)) { partie.listeJoueurs.Remove(this); }
-            }
-
-            
-        }
     }
 
     public void TraiterMessages(String[] msg)
