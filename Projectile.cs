@@ -13,13 +13,15 @@ public class Projectile : ElementMap
         this.idJoueur = idJoueur;
         this.direction = direction;
         this.partie = partie;
+        largeur = 50;
+        hauteur = 50;
     }
 
     public override void Actualiser()
     {
         
-        x = x + Convert.ToInt32(Math.Round(Math.Cos((double) direction * (Math.PI / 180.0)))) * vitesse;
-        y = y + Convert.ToInt32(Math.Round(Math.Sin((double) direction * (Math.PI / 180.0)))) * vitesse;
+        x += Convert.ToInt32(Math.Round(Math.Cos(direction * Math.PI / 180.0) * vitesse));
+        y += Convert.ToInt32(Math.Round(Math.Sin(-direction * Math.PI / 180.0) * vitesse));
 
         // On gère les dégats quand il y a une collision avec un des joueurs, sauf celui qui a lancé le projectile sinon il est touché à la création du projectile (variable idJoueur)
         foreach (Joueur j in partie.listeJoueurs)
@@ -29,15 +31,10 @@ public class Projectile : ElementMap
                 if (Collision(this, j))
                 {
                     j.vie -= degats;
-                    SupprimerProjectile();
+                    suppr = true;
                     break;
                 }
             }
         }
-    }
-
-    public void SupprimerProjectile()
-    {
-        partie.listeProjectile.Remove(this);
     }
 }

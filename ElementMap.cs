@@ -7,6 +7,7 @@ public abstract class ElementMap
     public int y { get; set; }
     public int largeur { get; set; }
     public int hauteur { get; set; }
+    public bool suppr { get; set; }
 
     // Trouve un id pas utilisé parmi une liste d'éléments ElementMap
     public static int TrouverIdDispo(List<ElementMap> listeElem)
@@ -36,6 +37,7 @@ public abstract class ElementMap
         this.id = id;
         this.x = x;
         this.y = y;
+        suppr = false;
     }
 
     public bool Collision(ElementMap elem1, ElementMap elem2)

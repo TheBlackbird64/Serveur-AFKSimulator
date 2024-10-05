@@ -18,7 +18,6 @@ public class Joueur : ElementMap
     public string couleur { get; set; }
     public int tempsAfkMs { get; set; }
     public bool connecte { get; set; } = true;
-    public bool suppr { get; set; } = false;
     
     public const string sep1 = "|";
     public const string sep2 = ",";
@@ -126,15 +125,26 @@ public class Joueur : ElementMap
         {
             if (partie != null && partie.started)
             {
-                x = int.Parse(msg[1]);
-                y = int.Parse(msg[2]);
-
-                // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
-                // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
-                if (msg[3] != "-1")
+                bool err = false;
+                int dirProjectile = 0;
+                try
                 {
-                    partie.listeProjectile.Add(new Projectile(ElementMap.TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, int.Parse(msg[3]), partie));
+                    x = int.Parse(msg[1]);
+                    y = int.Parse(msg[2]);
+                    dirProjectile = int.Parse(msg[3]);
                 }
+                catch { err = true; }
+                
+                if (! err)
+                {
+                    // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
+                    // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
+                    if (msg[3] != "-1")
+                    {
+                        partie.listeProjectile.Add(new Projectile(ElementMap.TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, dirProjectile, partie));
+                    }
+                }
+                
             }
             
         }
