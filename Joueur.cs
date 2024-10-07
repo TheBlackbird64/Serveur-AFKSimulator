@@ -18,6 +18,7 @@ public class Joueur : ElementMap
     public string couleur { get; set; }
     public int tempsAfkMs { get; set; }
     public bool connecte { get; set; } = true;
+    public Stopwatch chrono { get; set; }
     
     public const string sep1 = "|";
     public const string sep2 = ",";
@@ -29,6 +30,7 @@ public class Joueur : ElementMap
         
         sock = socket;
         serveur = serv;
+        chrono = new Stopwatch();
 
         pseudo = "";
         vie = 0;
@@ -45,6 +47,8 @@ public class Joueur : ElementMap
         vie = 100;
         couleur = "000000";
         tempsAfkMs = 0;
+        chrono.Reset();
+        chrono.Start();
     }
 
     public async void RecMessagesAsync()
@@ -137,6 +141,8 @@ public class Joueur : ElementMap
                 
                 if (! err)
                 {
+                    
+
                     // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
                     // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
                     if (msg[3] != "-1")
@@ -171,8 +177,7 @@ public class Joueur : ElementMap
         // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
         // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
 
-        // Calcul du temps AFK
-
+        if (vie <= 0) { chrono.Stop(); }
     }
 
     public void Log(String msg)

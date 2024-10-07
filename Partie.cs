@@ -9,6 +9,7 @@ public class Partie
     public const int nbJoueursMin = 5;
     public const int nbJoueursMax = 10;
     public const int actualiserIntervalleMs = 50;
+    public const int tempsVictoire = 20 * 1000;
 
     public object lockObj { get; set; } = new object();
     public List<Joueur> listeJoueurs { get; set; }
@@ -126,10 +127,12 @@ public class Partie
             infosProjectiles += string.Join(Joueur.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString()]) + Joueur.sep3;
         }
 
-        // Envoi du message d'actualisation pour les clients : Construction du message
+        // Envoi du message d'actualisation pour les clients : Construction du message + vérif si y'en a un qui a gagné
         string infosJoueurs = "";
+        bool victoire = false;
         foreach (Joueur j in listeJoueurs)
         {
+            if (j.chrono.ElapsedMilliseconds > tempsVictoire) { victoire = true; }
             j.Actualiser();
             infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur.ToString()]) + Joueur.sep3;
         }
