@@ -2,7 +2,7 @@ using System;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
-
+using System.Diagnostics;
 
 
 public class Joueur : ElementMap
