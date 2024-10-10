@@ -48,7 +48,6 @@ public class Joueur : ElementMap
         couleur = "000000";
         tempsAfkMs = 0;
         chrono.Reset();
-        chrono.Start();
     }
 
     public async void RecMessagesAsync()
@@ -131,23 +130,29 @@ public class Joueur : ElementMap
             {
                 bool err = false;
                 int dirProjectile = 0;
+                int x2 = x;
+                int y2 = y;
                 try
                 {
-                    x = int.Parse(msg[1]);
-                    y = int.Parse(msg[2]);
+                    x2 = int.Parse(msg[1]);
+                    y2 = int.Parse(msg[2]);
                     dirProjectile = int.Parse(msg[3]);
                 }
                 catch { err = true; }
                 
                 if (! err)
                 {
-                    
+                    // Si le joueur bouge son chrono est remis à 0
+                    if (x != x2 || y != y2)
+                    {
+                        chrono.Reset();
+                    }
 
                     // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
                     // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
                     if (msg[3] != "-1")
                     {
-                        partie.listeProjectile.Add(new Projectile(ElementMap.TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, dirProjectile, partie));
+                        partie.listeProjectile.Add(new Projectile(ElementMap.TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, dirProjectile, partie, partie.map));
                     }
                 }
                 

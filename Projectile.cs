@@ -1,20 +1,23 @@
 
+
 public class Projectile : ElementMap
 {
     public int idJoueur { get; set; }
     public int direction { get; set; }
-    public int vitesse { get; set; } = 5;
+    public int vitesse { get; set; } = 10;
     public int degats { get; set; } = 5;
     public Partie partie { get; set; }
+    public Map map { get; set; }
 
 
-    public Projectile(int id, int x, int y, int idJoueur, int direction, Partie partie) : base(id, x, y)
+    public Projectile(int id, int x, int y, int idJoueur, int direction, Partie partie, Map map) : base(id, x, y)
     {
         this.idJoueur = idJoueur;
         this.direction = direction;
         this.partie = partie;
         largeur = 50;
         hauteur = 50;
+        this.map = map; 
     }
 
     public override void Actualiser()
@@ -35,6 +38,14 @@ public class Projectile : ElementMap
                     break;
                 }
             }
+        }
+
+        int x2 = x - Map.coinMapG;
+        int y2 = y - Map.coinMapH;
+
+        if (map.TabBool()[x2 / Map.tailleMap, y2 / Map.tailleMap] || map.TabBool()[(x2+largeur) / Map.tailleMap, (y2+hauteur) / Map.tailleMap])
+        {
+            suppr = true;
         }
     }
 }

@@ -18,6 +18,7 @@ public class Partie
     public int graine { get; set; }
     public bool started { get; set; }
     public Stopwatch chrono { get; set; }
+    public Map map { get; set; }
 
 
     // Boucle asynchrone qui place les joueurs de la file d'attente dans les parties incompletes, crée les parties si nécéssaire et actualise les parties existantes.
@@ -90,6 +91,10 @@ public class Partie
 
         Random rnd = new Random();
         graine = rnd.Next(1, 1000000);
+        map = new Map(graine);
+
+        map.GenTab();
+        map.GenLisserTab(map.tabObstacle);
     }
 
     // Commence une partie, prévient les clients du début de la partie
@@ -102,19 +107,6 @@ public class Partie
     // Actualisation de toute la map (positions, vies, ..)
     public void Actualiser()
     {
-        if (!chrono.IsRunning)
-        {
-            if (listeJoueurs.Count == 0) { chrono.Start(); }
-        }
-        else
-        {
-            if (listeJoueurs.Count != 0) { chrono.Stop(); }
-            if (chrono.Elapsed.TotalSeconds > 10) { 
-                listePartie.Remove(this);
-                Console.WriteLine("Partie supprimée");
-            }
-        }
-
         SupprimerElementsMap<Projectile> (listeProjectile);
 
         // Actualisation des ElementMap 
@@ -132,15 +124,39 @@ public class Partie
         bool victoire = false;
         foreach (Joueur j in listeJoueurs)
         {
-            if (j.chrono.ElapsedMilliseconds > tempsVictoire) { victoire = true; }
+            if (j.chrono.ElapsedMilliseconds > tempsVictoire) { victoire = true; break; }
             j.Actualiser();
             infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur.ToString()]) + Joueur.sep3;
         }
 
-        // Envoi du message d'actualisation pour les clients
-        foreach (Joueur j in listeJoueurs)
+        if (! victoire)
         {
-            j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs, infosJoueurs, infosProjectiles]));
+            // Envoi du message d'actualisation pour les clients
+            foreach (Joueur j in listeJoueurs)
+            {
+                j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs, infosJoueurs, infosProjectiles]));
+            }
+        }
+        else
+        {
+            // Envoi du message de fin de partie
+
+        }
+
+
+        // Supprime la partie si elle est inutilisé
+        if (!chrono.IsRunning)
+        {
+            if (listeJoueurs.Count == 0) { chrono.Start(); }
+        }
+        else
+        {
+            if (listeJoueurs.Count != 0) { chrono.Stop(); }
+            if (chrono.Elapsed.TotalSeconds > 10)
+            {
+                listePartie.Remove(this);
+                Console.WriteLine("Partie supprimée");
+            }
         }
     }
 }
