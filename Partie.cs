@@ -1,15 +1,17 @@
 
 
+using Microsoft.VisualBasic;
 using System.Diagnostics;
 
 public class Partie
 {
     public static List<Partie> listePartie = new List<Partie>();
     public static List<Joueur> fileAttente = new List<Joueur>();
-    public const int nbJoueursMin = 5;
+    public const int nbJoueursMin = 1;
     public const int nbJoueursMax = 10;
     public const int actualiserIntervalleMs = 50;
-    public const int tempsVictoire = 20 * 1000;
+    public const int tempsVictoire = 120;
+    public const int tempsSupprPartie = 5;
 
     public object lockObj { get; set; } = new object();
     public List<Joueur> listeJoueurs { get; set; }
@@ -30,14 +32,6 @@ public class Partie
 
             SupprimerElementsMap<Joueur> (fileAttente);
 
-
-            // Créer une partie si la file d'attente est longue
-            if (fileAttente.Count >= nbJoueursMin)
-            {
-                Partie p = new Partie();
-                listePartie.Add(p);
-            }
-            
             foreach (Partie p in new List<Partie> (listePartie))
             {
                 // Actualise chaque parties
@@ -70,6 +64,13 @@ public class Partie
 
                 SupprimerElementsMap<Joueur>(p.listeJoueurs);
             }
+
+            // Créer une partie si la file d'attente est longue
+            if (fileAttente.Count >= nbJoueursMin)
+            {
+                Partie p = new Partie();
+                listePartie.Add(p);
+            }
         }
     }
 
@@ -85,6 +86,8 @@ public class Partie
 
     public Partie()
     {
+        Console.WriteLine("Partie créée");
+
         listeJoueurs = new List<Joueur>();
         listeProjectile = new List<Projectile>();
         chrono = new Stopwatch();
@@ -94,8 +97,21 @@ public class Partie
         map = new Map(graine);
 
         map.GenTab();
-        map.GenLisserTab(map.tabObstacle);
+        map.tabObstacle = map.GenLisserTab(map.tabObstacle, 2);
+        /*
+        // debug 
+        for (int i = 0; Map.tailleMap > i; i++)
+        {
+            for (int j = 0; Map.tailleMap > j; j++)
+            {
+                if (map.tabObstacle[i, j] > Map.valInf)
+                {
+                    Console.WriteLine(i.ToString() + "   " + j.ToString() + " : " + map.tabObstacle[i, j].ToString());
+                }
+            }
+        }//*/
     }
+   
 
     // Commence une partie, prévient les clients du début de la partie
     public void StartClient(Joueur j)
@@ -113,34 +129,40 @@ public class Partie
         // Pour optimiser, l'actualisation des objets se fait dans la même boucle que celle qui sert à récupérer les infos à envoyer aux client pour les actualiser
 
         string infosProjectiles = "";
-        foreach (Projectile p in listeProjectile)
+        foreach (Projectile p in new List<Projectile> (listeProjectile))
         {
             p.Actualiser();
-            infosProjectiles += string.Join(Joueur.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString()]) + Joueur.sep3;
+            infosProjectiles += string.Join(Joueur.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString(), p.idJoueur.ToString()]) + Joueur.sep3;
         }
 
         // Envoi du message d'actualisation pour les clients : Construction du message + vérif si y'en a un qui a gagné
         string infosJoueurs = "";
-        bool victoire = false;
+        Joueur? gagnant = null;
         foreach (Joueur j in listeJoueurs)
         {
-            if (j.chrono.ElapsedMilliseconds > tempsVictoire) { victoire = true; break; }
+            if (j.chrono.Elapsed.TotalSeconds > tempsVictoire) { gagnant = j; break; }
             j.Actualiser();
             infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur.ToString()]) + Joueur.sep3;
         }
 
-        if (! victoire)
+        if (gagnant == null)
         {
             // Envoi du message d'actualisation pour les clients
             foreach (Joueur j in listeJoueurs)
             {
-                j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs, infosJoueurs, infosProjectiles]));
+                j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs.ToString(), infosJoueurs, infosProjectiles]));
             }
         }
         else
         {
             // Envoi du message de fin de partie
+            foreach (Joueur j in listeJoueurs)
+            {
+                j.EnvoyerMessage(string.Join(Joueur.sep2, ["g", gagnant.pseudo]));
+            }
 
+            Console.WriteLine("Partie terminée (id gagnant : " + gagnant.id.ToString() + " )");
+            listePartie.Remove(this);
         }
 
 
@@ -152,7 +174,7 @@ public class Partie
         else
         {
             if (listeJoueurs.Count != 0) { chrono.Stop(); }
-            if (chrono.Elapsed.TotalSeconds > 10)
+            if (chrono.Elapsed.TotalSeconds > tempsSupprPartie)
             {
                 listePartie.Remove(this);
                 Console.WriteLine("Partie supprimée");

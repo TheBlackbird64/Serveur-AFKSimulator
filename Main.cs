@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 
 public class Principale
@@ -18,7 +19,7 @@ public class Principale
                 Console.Write("  ");
             }
         }*/
-		
+
         Serveur s = new Serveur (10000, 100);
 		Task t = s.Start();
 		t.Wait();

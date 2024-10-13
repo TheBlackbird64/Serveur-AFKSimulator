@@ -4,8 +4,8 @@ public class Projectile : ElementMap
 {
     public int idJoueur { get; set; }
     public int direction { get; set; }
-    public int vitesse { get; set; } = 10;
-    public int degats { get; set; } = 5;
+    public int vitesse { get; set; } = 20;
+    public int degats { get; set; } = 10;
     public Partie partie { get; set; }
     public Map map { get; set; }
 
@@ -15,8 +15,8 @@ public class Projectile : ElementMap
         this.idJoueur = idJoueur;
         this.direction = direction;
         this.partie = partie;
-        largeur = 50;
-        hauteur = 50;
+        largeur = 25;
+        hauteur = 25;
         this.map = map; 
     }
 
@@ -40,12 +40,19 @@ public class Projectile : ElementMap
             }
         }
 
-        int x2 = x - Map.coinMapG;
-        int y2 = y - Map.coinMapH;
-
-        if (map.TabBool()[x2 / Map.tailleMap, y2 / Map.tailleMap] || map.TabBool()[(x2+largeur) / Map.tailleMap, (y2+hauteur) / Map.tailleMap])
+        // Suppression si sortie de la map
+        int x2 = 0;
+        int y2 = 0;
+        for (int i = 0; 1 >= i; i++)
         {
-            suppr = true;
+            for (int j = 0; 1 >= j; j++)
+            {
+                x2 = (x - Map.coinMapG + largeur*i) / Map.tailleMap;
+                y2 = (y - Map.coinMapH + hauteur*j) / Map.tailleMap;
+
+                if (x < Map.coinMapG || y < Map.coinMapH || x2 >= Map.tailleMap || y2 >= Map.tailleMap) { suppr = true; }
+                else if (map.TabBool()[x2, y2]) { suppr = true; }
+            }
         }
     }
 }

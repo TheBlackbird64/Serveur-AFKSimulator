@@ -16,7 +16,7 @@ public class Joueur : ElementMap
     public string pseudo { get; set; }
     public int vie { get; set; }
     public string couleur { get; set; }
-    public int tempsAfkMs { get; set; }
+    public long tempsAfkMs { get { return chrono.ElapsedMilliseconds; } }
     public bool connecte { get; set; } = true;
     public Stopwatch chrono { get; set; }
     
@@ -35,7 +35,9 @@ public class Joueur : ElementMap
         pseudo = "";
         vie = 0;
         couleur = "000000";
-        tempsAfkMs = 0;
+
+        largeur = 50;
+        hauteur = 50;
 
         Log("Client connecté");
     }
@@ -45,9 +47,9 @@ public class Joueur : ElementMap
         x = 0;
         y = 0;
         vie = 100;
-        couleur = "000000";
-        tempsAfkMs = 0;
-        chrono.Reset();
+        couleur = "000000"; 
+        if (chrono.IsRunning) { chrono.Restart(); }
+        else {  chrono.Start(); }
     }
 
     public async void RecMessagesAsync()
@@ -126,7 +128,7 @@ public class Joueur : ElementMap
         }
         else if (msg[0] == "a") // Actualiser position et éventuellement tir
         {
-            if (partie != null && partie.started)
+            if (partie != null && partie.started && vie > 0)
             {
                 bool err = false;
                 int dirProjectile = 0;
@@ -145,8 +147,11 @@ public class Joueur : ElementMap
                     // Si le joueur bouge son chrono est remis à 0
                     if (x != x2 || y != y2)
                     {
-                        chrono.Reset();
+                        chrono.Restart();
                     }
+
+                    x = x2;
+                    y = y2;
 
                     // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
                     // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
@@ -182,7 +187,11 @@ public class Joueur : ElementMap
         // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
         // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
 
-        if (vie <= 0) { chrono.Stop(); }
+        if (vie <= 0) { 
+            chrono.Stop();
+            x = 0;
+            y = 0;
+        }
     }
 
     public void Log(String msg)

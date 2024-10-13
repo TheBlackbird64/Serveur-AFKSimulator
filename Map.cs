@@ -10,7 +10,7 @@ public class Map
     public const int tailleMap = 50;
 
     // Valeurs de génération
-    public const double valInf = 0.8;
+    public const double valInf = 0.6;
     public const int nbVoisins = 3;
     public const int nbDec = 3;
     public double[,] tabObstacle = new double[tailleMap, tailleMap];
@@ -18,7 +18,6 @@ public class Map
     public Map(int graine)
     {
         valRnd = graine;
-        GenRnd();
     }
 
     // Générateur congruentiel linéaire
@@ -45,27 +44,26 @@ public class Map
         {
             for (int j = 0; tailleMap > j; j++)
             {
-                tabObstacle[i, j] = GenRange(-1, 1, 2);
+                tabObstacle[i, j] = GenRange(-1, 1);
             }
         }
+
     }
 
     public List<double> TabVoisins(double[,] tab, int i, int j)
     {
         List<double> d = new List<double>();
-        for (var i1 = -1; 1 >= i1; i1++)
+        for (int i1 = -1; 1 >= i1; i1++)
         {
-            for (var j1 = -1; 1 >= j1; j1++)
+            for (int j1 = -1; 1 >= j1; j1++)
             {
-                try
+                if (i+i1 >= 0 && j+j1 >= 0 && i + i1 < tailleMap && j + j1 < tailleMap)
                 {
                     d.Add(tab[i + i1, j + j1]);
-    
                 }
-                catch { }
             }
         }
-
+        
         return d;
     }
 
@@ -90,11 +88,11 @@ public class Map
             {
                 if (ValVoisins(TabVoisins(tab, i, j), valInf, 1) > nbVoisins)
                 {
-                    tabLisse[i, j] = GenRange(valInf, 1, 2);
+                    tabLisse[i, j] = GenRange(valInf, 1);
                 }
                 else
                 {
-                    tabLisse[i, j] = GenRange(-1, valInf-Math.Pow(10, -nbDec), 3);
+                    tabLisse[i, j] = GenRange(-1, valInf-Math.Pow(10, -nbDec));
                 }
             }
         }
