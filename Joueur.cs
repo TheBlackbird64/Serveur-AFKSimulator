@@ -47,7 +47,7 @@ public class Joueur : ElementMap
         x = 0;
         y = 0;
         vie = 100;
-        couleur = "000000"; 
+        couleur = "FF0000"; 
         if (chrono.IsRunning) { chrono.Restart(); }
         else {  chrono.Start(); }
     }
@@ -186,7 +186,7 @@ public class Joueur : ElementMap
     {
         // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
         // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
-
+        vie--;
         if (vie <= 0) { 
             chrono.Stop();
             x = 0;
