@@ -15,6 +15,11 @@ public class Map
     public const int nbDec = 3;
     public double[,] tabObstacle = new double[tailleMap, tailleMap];
 
+    // Convertit une coordonnée x en indice de ligne de tableau de taille tailleMap.
+    public static int XToRow(int x) => (x - coinMapG) / tailleMap;
+    public static int YToRow(int y) => (y - coinMapH) / tailleMap;
+
+
     public Map(int graine)
     {
         valRnd = graine;

@@ -47,8 +47,8 @@ public class Projectile : ElementMap
         {
             for (int j = 0; 1 >= j; j++)
             {
-                x2 = (x - Map.coinMapG + largeur*i) / Map.tailleMap;
-                y2 = (y - Map.coinMapH + hauteur*j) / Map.tailleMap;
+                x2 = Map.XToRow(x - Map.coinMapG); //(x - Map.coinMapG + largeur*i) / Map.tailleMap;
+                y2 = Map.YToRow(y - Map.coinMapH); //(y - Map.coinMapH + hauteur*j) / Map.tailleMap;
 
                 if (x < Map.coinMapG || y < Map.coinMapH || x2 >= Map.tailleMap || y2 >= Map.tailleMap) { suppr = true; }
                 else if (map.TabBool()[x2, y2]) { suppr = true; }

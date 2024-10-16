@@ -142,6 +142,7 @@ public class Partie
         {
             if (j.chrono.Elapsed.TotalSeconds > tempsVictoire) { gagnant = j; break; }
             j.Actualiser();
+
             infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur.ToString()]) + Joueur.sep3;
         }
 
@@ -155,6 +156,8 @@ public class Partie
         }
         else
         {
+
+
             // Envoi du message de fin de partie
             foreach (Joueur j in listeJoueurs)
             {
