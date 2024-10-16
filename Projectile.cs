@@ -41,18 +41,15 @@ public class Projectile : ElementMap
         }
 
         // Suppression si sortie de la map
-        int x2 = 0;
-        int y2 = 0;
-        for (int i = 0; 1 >= i; i++)
+        if (x < Map.coinMapG || y < Map.coinMapH || Map.XToRow(x + largeur) >= Map.tailleMap || Map.YToRow(y + hauteur) >= Map.tailleMap) { suppr = true; }
+        else
         {
-            for (int j = 0; 1 >= j; j++)
+            // Collisions
+            if (Collision(this, map.TabBool()))
             {
-                x2 = Map.XToRow(x - Map.coinMapG); //(x - Map.coinMapG + largeur*i) / Map.tailleMap;
-                y2 = Map.YToRow(y - Map.coinMapH); //(y - Map.coinMapH + hauteur*j) / Map.tailleMap;
-
-                if (x < Map.coinMapG || y < Map.coinMapH || x2 >= Map.tailleMap || y2 >= Map.tailleMap) { suppr = true; }
-                else if (map.TabBool()[x2, y2]) { suppr = true; }
+                suppr = true;
             }
         }
+        
     }
 }

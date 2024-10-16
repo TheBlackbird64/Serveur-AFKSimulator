@@ -8,6 +8,7 @@ public class Map
     public const int coinMapH = 250;
     public const int coinMapG = 250;
     public const int tailleMap = 50;
+    public const int tailleCellMap = 50;
 
     // Valeurs de génération
     public const double valInf = 0.6;
@@ -16,8 +17,8 @@ public class Map
     public double[,] tabObstacle = new double[tailleMap, tailleMap];
 
     // Convertit une coordonnée x en indice de ligne de tableau de taille tailleMap.
-    public static int XToRow(int x) => (x - coinMapG) / tailleMap;
-    public static int YToRow(int y) => (y - coinMapH) / tailleMap;
+    public static int XToRow(int x) => (x - coinMapG) / tailleCellMap;
+    public static int YToRow(int y) => (y - coinMapH) / tailleCellMap;
 
 
     public Map(int graine)

@@ -187,6 +187,19 @@ public class Joueur : ElementMap
         // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
         // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
         
+        if (partie != null )
+        {
+            int x2 = 0;
+            int y2 = 0;
+
+            (x2, y2) = CollisionGetPos(this, partie.map.TabBool());
+
+            if (x2 != -1 && y2 != -1)
+            {
+                Item.tabItem[x2, y2].RecupererItem(this);
+            }
+        }
+
         if (vie <= 0) { 
             chrono.Stop();
             x = 0;
