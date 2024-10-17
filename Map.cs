@@ -21,22 +21,6 @@ namespace AFKSimulator
         public static int XToRow(int x) => (x - coinMapG) / tailleCellMap;
         public static int YToRow(int y) => (y - coinMapH) / tailleCellMap;
         
-        public static (int, int) CelluleLibre(bool[,] tab)
-        {
-            int x = 0;
-            int y = 0;
-            Random rnd = new Random();
-            do
-            {
-                x = rnd.Next(0, tailleMap);
-                y = rnd.Next(0, tailleMap);
-            }
-            while (tab[x, y]);
-
-            return (x, y);
-        }
-
-
 
         public Map(int graine)
         {

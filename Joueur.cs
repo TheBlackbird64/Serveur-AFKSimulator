@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Diagnostics;
+using Serveur_AFKSimulator.Items;
 
 namespace AFKSimulator
 {
@@ -15,10 +16,10 @@ namespace AFKSimulator
 
         public string pseudo { get; set; }
         public int vie { get; set; }
-        public string colRouge { get; set; }
-        public string colVert { get; set; }
-        public string colBleu { get; set; }
-        public string couleur { get { return colRouge + colVert + colBleu; } }
+        public int colRouge { get; set; }
+        public int colVert { get; set; }
+        public int colBleu { get; set; }
+        public string couleur { get { return colRouge.ToString("X") + colVert.ToString("X") + colBleu.ToString("X"); } }
         public long tempsAfkMs { get { return chrono.ElapsedMilliseconds; } }
         public bool connecte { get; set; } = true;
         public Stopwatch chrono { get; set; }
@@ -37,9 +38,9 @@ namespace AFKSimulator
 
             pseudo = "";
             vie = 0;
-            colRouge = "00";
-            colVert = "00";
-            colBleu = "00";
+            colRouge = 0;
+            colVert = 0;
+            colBleu = 0;
 
             largeur = 50;
             hauteur = 50;
@@ -53,9 +54,9 @@ namespace AFKSimulator
             y = 0;
             vie = 100;
 
-            colRouge = "00";
-            colVert = "00";
-            colBleu = "00";
+            colRouge = 0;
+            colVert = 0;
+            colBleu = 0;
 
             if (chrono.IsRunning) { chrono.Restart(); }
             else { chrono.Start(); }
@@ -198,9 +199,22 @@ namespace AFKSimulator
             // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
             // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
 
+            // Verification recuperer item
             if (partie != null)
             {
-
+                if (Collision(this, Item.tabPosItem))
+                {
+                    for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
+                    {
+                        for (int j = 0; j < GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]].Count; j++)
+                        {
+                            if (Collision(this, GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j]))
+                            {
+                                GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j].RecupererItem(this);
+                            }
+                        }
+                    }
+                }
             }
 
             if (vie <= 0)

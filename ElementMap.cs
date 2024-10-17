@@ -52,6 +52,8 @@ namespace AFKSimulator
             int y2 = -1;
             bool collision = false;
 
+            if (elem1.x == 0 && elem1.y == 0) { return (-1, -1); }
+
             for (int i = 0; 1 >= i; i++)
             {
                 for (int j = 0; 1 >= j; j++)
@@ -59,6 +61,7 @@ namespace AFKSimulator
                     x2 = Map.XToRow(elem1.x + elem1.largeur * i);
                     y2 = Map.YToRow(elem1.y + elem1.hauteur * j);
 
+                    Console.WriteLine(x2.ToString() + "   " + y2.ToString());
                     if (tabMap[x2, y2]) { collision = true; break; }
                 }
                 if (collision) { break; }

@@ -9,9 +9,9 @@ namespace Serveur_AFKSimulator.Items
         public static int delaiApparition = 3;
         public static Stopwatch chrono = new Stopwatch();
 
-        const int valAjoutCouleur = 17;
+        private const int valAjoutCouleur = 17;
         public enum Couleur { Rouge, Vert, Bleu }
-        Couleur col;
+        public Couleur col;
 
         public OrbeCouleur(int id, int x, int y) : base(id, x, y)
         {
@@ -36,21 +36,28 @@ namespace Serveur_AFKSimulator.Items
 
         public override void RecupererItem(Joueur j)
         {
-            string ajoutCol = valAjoutCouleur.ToString("X");
             if (col == Couleur.Rouge )
             {
-                j.colRouge += ajoutCol;
+                j.colRouge += valAjoutCouleur;
+                if (j.colRouge > 255) { j.colRouge = 255; }
             }
             if (col == Couleur.Vert)
             {
-                j.colVert += ajoutCol;
+                j.colVert += valAjoutCouleur;
+                if (j.colVert > 255) { j.colVert = 255; }
             }
             if (col == Couleur.Bleu)
             {
-                j.colBleu += ajoutCol;
+                j.colBleu += valAjoutCouleur;
+                if (j.colBleu > 255) { j.colBleu = 255; }
             }
 
             suppr = true;
+        }
+
+        public override string InfosItem()
+        {
+            return string.Join(Joueur.sep4, [id.ToString(), "OrbeCouleur", x.ToString(), y.ToString(), ((int)col).ToString()]) + Joueur.sep3;
         }
     }
 }

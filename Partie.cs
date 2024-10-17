@@ -18,7 +18,6 @@ namespace AFKSimulator
         // éléments du jeu
         public List<Joueur> listeJoueurs { get; set; }
         public List<Projectile> listeProjectile { get; set; }
-        public List<Item> listeItem { get; set; }
         public Stopwatch chrono { get; set; }
         public Map map { get; set; }
 
@@ -98,7 +97,6 @@ namespace AFKSimulator
 
             listeJoueurs = new List<Joueur>();
             listeProjectile = new List<Projectile>();
-            listeItem = new List<Item>();
 
             chrono = new Stopwatch();
 
@@ -108,6 +106,7 @@ namespace AFKSimulator
             map.GenTab();
             map.tabObstacle = map.GenLisserTab(map.tabObstacle, 2);
 
+            GestionnaireItem.Initialiser();
         }
 
         ~Partie()
@@ -137,30 +136,26 @@ namespace AFKSimulator
         // Actualisation de toute la map (positions, vies, ..)
         public void Actualiser()
         {
-            // Items (faire une fonction qui fait ces opérations pour tout les items)
-            /*
-            int nbItem = 0;
-            int xItem;
-            int yItem;
-            (xItem, yItem) = Map.CelluleLibre(map.TabBool());
-            nbItem = listeItem.Count(item => item.GetType() == typeof(OrbeCouleur));
-            if (OrbeCouleur.maxItems < nbItem && OrbeCouleur.chrono.Elapsed.TotalSeconds > OrbeCouleur.delaiApparition)
+            // Items 
+            string infosItems = "";
+            for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
             {
-                listeItem.Add(new OrbeCouleur(ElementMap.TrouverIdDispo(new List<ElementMap>(listeItem)), xItem, yItem));
-                OrbeCouleur.chrono.Restart();
-            }
+                SupprimerElementsMap<Item>(GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]]);
 
-            SupprimerElementsMap<Item>(listeItem);
-            string infosItem = "";
-            foreach (Item i in new List<Item>(listeItem))
-            {
-                if (typeof(i) == typeof(OrbeCouleur)) { infosItem += string.Join(Joueur.sep4, [i.id.ToString(), i.x.ToString(), i.y.ToString(), i.col.ToString()]) + Joueur.sep3; }
-            }*/
+                foreach (Item It in GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]])
+                {
+                    infosItems += It.InfosItem();
+                }
+                    
+            }
+            GestionnaireItem.Actualiser(map);
+
+
 
             // Actualisation des ElementMap 
             // Pour optimiser, l'actualisation des objets se fait dans la même boucle que celle qui sert à récupérer les infos à envoyer aux client pour les actualiser
             SupprimerElementsMap<Projectile>(listeProjectile);
-            string infosProjectiles = "";
+            string infosProjectiles = string.Join(Joueur.sep4, ["-1", "0", "0", "0", "0"]) + Joueur.sep3;
             foreach (Projectile p in new List<Projectile>(listeProjectile))
             {
                 p.Actualiser();
@@ -183,7 +178,7 @@ namespace AFKSimulator
                 // Envoi du message d'actualisation pour les clients
                 foreach (Joueur j in listeJoueurs)
                 {
-                    j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs.ToString(), infosJoueurs, infosProjectiles]));
+                    j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs.ToString(), infosJoueurs, infosProjectiles, infosItems]));
                 }
             }
             else
