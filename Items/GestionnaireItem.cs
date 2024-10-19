@@ -8,6 +8,8 @@ namespace Serveur_AFKSimulator.Items
     public static class GestionnaireItem
     {
         // Variables
+        public static bool initialise = false;
+
         public struct DataItems
         {
             public int tpsApparitionMs;
@@ -34,8 +36,9 @@ namespace Serveur_AFKSimulator.Items
             ];
 
         public static DataItems[] tabVariables = [
-            new DataItems(2000, 8, new Stopwatch())
+            new DataItems(2000, 13, new Stopwatch())
             ];
+
 
 
         public static (int, int) CelluleLibre(bool[,] tab1, bool[,] tab2)
@@ -66,6 +69,7 @@ namespace Serveur_AFKSimulator.Items
 
         public static void Initialiser()
         {
+            initialise = true;
             for (int i = 0; i < tabTypes.Length; i++)
             {
 
@@ -77,12 +81,12 @@ namespace Serveur_AFKSimulator.Items
 
         public static void Actualiser(Map map)
         {
-            
 
             for (int i = 0; i < tabTypes.Length; i++)
             {
                 if (dictItemData[tabTypes[i]].chrono.ElapsedMilliseconds > dictItemData[tabTypes[i]].tpsApparitionMs && dictItemInstance[tabTypes[i]].Count < dictItemData[tabTypes[i]].maxItem)
                 {
+                    dictItemData[tabTypes[i]].chrono.Restart();
                     dictItemInstance[tabTypes[i]].Add(CreerInstances(tabTypes[i], map, dictItemInstance[tabTypes[i]]));
                 }
             }

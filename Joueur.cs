@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Diagnostics;
 using Serveur_AFKSimulator.Items;
+using System.Linq;
 
 namespace AFKSimulator
 {
@@ -19,7 +20,7 @@ namespace AFKSimulator
         public int colRouge { get; set; }
         public int colVert { get; set; }
         public int colBleu { get; set; }
-        public string couleur { get { return colRouge.ToString("X") + colVert.ToString("X") + colBleu.ToString("X"); } }
+        public string couleur { get { return colToString(colRouge) + colToString(colVert) + colToString(colBleu); } }
         public long tempsAfkMs { get { return chrono.ElapsedMilliseconds; } }
         public bool connecte { get; set; } = true;
         public Stopwatch chrono { get; set; }
@@ -28,6 +29,14 @@ namespace AFKSimulator
         public const string sep2 = ",";
         public const string sep3 = ";";
         public const string sep4 = "!";
+
+        public static string colToString(int col)
+        {
+            string c = col.ToString("X");
+            if (c.Length == 1) { c = "0" + c; }
+            return c;
+        }
+
 
         public Joueur(Socket socket, int _id, Serveur serv) : base(_id, 0, 0)
         {
@@ -139,8 +148,10 @@ namespace AFKSimulator
             }
             else if (msg[0] == "a") // Actualiser position et éventuellement tir
             {
+                
                 if (partie != null && partie.started && vie > 0)
                 {
+                    Console.WriteLine(string.Join(sep1, msg));
                     bool err = false;
                     int dirProjectile = 0;
                     int x2 = x;
@@ -149,6 +160,7 @@ namespace AFKSimulator
                     {
                         x2 = int.Parse(msg[1]);
                         y2 = int.Parse(msg[2]);
+                        
                         dirProjectile = int.Parse(msg[3]);
                     }
                     catch { err = true; }

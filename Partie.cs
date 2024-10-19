@@ -106,7 +106,7 @@ namespace AFKSimulator
             map.GenTab();
             map.tabObstacle = map.GenLisserTab(map.tabObstacle, 2);
 
-            GestionnaireItem.Initialiser();
+            if (! GestionnaireItem.initialise) { GestionnaireItem.Initialiser(); }
         }
 
         ~Partie()
@@ -155,7 +155,7 @@ namespace AFKSimulator
             // Actualisation des ElementMap 
             // Pour optimiser, l'actualisation des objets se fait dans la même boucle que celle qui sert à récupérer les infos à envoyer aux client pour les actualiser
             SupprimerElementsMap<Projectile>(listeProjectile);
-            string infosProjectiles = string.Join(Joueur.sep4, ["-1", "0", "0", "0", "0"]) + Joueur.sep3;
+            string infosProjectiles = string.Join(Joueur.sep4, ["-1", "0", "0", "0", "-1"]) + Joueur.sep3; ;
             foreach (Projectile p in new List<Projectile>(listeProjectile))
             {
                 p.Actualiser();
@@ -170,7 +170,7 @@ namespace AFKSimulator
                 if (j.chrono.Elapsed.TotalSeconds > tempsVictoire) { gagnant = j; break; }
                 j.Actualiser();
 
-                infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur]) + Joueur.sep3;
+                infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.tempsAfkMs.ToString(), j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur]) + Joueur.sep3;
             }
 
             if (gagnant == null)
@@ -178,7 +178,7 @@ namespace AFKSimulator
                 // Envoi du message d'actualisation pour les clients
                 foreach (Joueur j in listeJoueurs)
                 {
-                    j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", j.tempsAfkMs.ToString(), infosJoueurs, infosProjectiles, infosItems]));
+                    j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", infosJoueurs, infosProjectiles, infosItems]));
                 }
             }
             else
