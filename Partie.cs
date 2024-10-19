@@ -149,18 +149,20 @@ namespace AFKSimulator
                     
             }
             GestionnaireItem.Actualiser(map);
+            if (infosItems.Length == 0) { infosItems = "*"; }
 
 
 
             // Actualisation des ElementMap 
             // Pour optimiser, l'actualisation des objets se fait dans la même boucle que celle qui sert à récupérer les infos à envoyer aux client pour les actualiser
             SupprimerElementsMap<Projectile>(listeProjectile);
-            string infosProjectiles = string.Join(Joueur.sep4, ["-1", "0", "0", "0", "-1"]) + Joueur.sep3; ;
+            string infosProjectiles = "";
             foreach (Projectile p in new List<Projectile>(listeProjectile))
             {
                 p.Actualiser();
                 infosProjectiles += string.Join(Joueur.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString(), p.idJoueur.ToString()]) + Joueur.sep3;
             }
+            if (infosProjectiles.Length == 0) { infosProjectiles = "*"; }
 
             // Envoi du message d'actualisation pour les clients : Construction du message + vérif si y'en a un qui a gagné
             string infosJoueurs = "";

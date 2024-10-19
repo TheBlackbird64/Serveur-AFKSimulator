@@ -151,7 +151,6 @@ namespace AFKSimulator
                 
                 if (partie != null && partie.started && vie > 0)
                 {
-                    Console.WriteLine(string.Join(sep1, msg));
                     bool err = false;
                     int dirProjectile = 0;
                     int x2 = x;

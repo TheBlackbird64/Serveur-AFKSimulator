@@ -60,9 +60,11 @@ namespace AFKSimulator
                 {
                     x2 = Map.XToRow(elem1.x + elem1.largeur * i);
                     y2 = Map.YToRow(elem1.y + elem1.hauteur * j);
-                    
 
-                    if (tabMap[x2, y2]) { collision = true; break; }
+                    if (x2 != tabMap.GetLength(0) && y2 != tabMap.GetLength(0))
+                    {
+                        if (tabMap[x2, y2]) { collision = true; break; }
+                    }
                 }
                 if (collision) { break; }
             }
