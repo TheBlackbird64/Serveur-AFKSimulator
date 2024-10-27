@@ -1,37 +1,14 @@
 
-namespace AFKSimulator
+
+namespace Serveur_AFKSimulator
 {
-    public abstract class ElementMap
+    public abstract class ElementMap : Identification
     {
-        public int id { get; set; }
         public int x { get; set; }
         public int y { get; set; }
         public int largeur { get; set; }
         public int hauteur { get; set; }
         public bool suppr { get; set; }
-
-        
-
-        // Trouve un id pas utilisé parmi une liste d'éléments ElementMap (id != 0)
-        public static int TrouverIdDispo(List<ElementMap> listeElem)
-        {
-            int idElem = 0;
-            bool dejaPresent = true;
-            while (dejaPresent)
-            {
-                idElem++;
-                dejaPresent = false;
-                foreach (ElementMap e in listeElem)
-                {
-                    if (e.id == idElem)
-                    {
-                        dejaPresent = true;
-                    }
-                }
-            }
-
-            return idElem;
-        }
 
 
         public ElementMap(int id, int x, int y)

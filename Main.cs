@@ -1,12 +1,12 @@
 ﻿
-namespace AFKSimulator
+namespace Serveur_AFKSimulator
 {
+
     public class Principale
     {
         public static void Main()
         {
-            Serveur s = new Serveur(10000, 100);
-            Task t = s.Start();
+            Task t = Serveur.Start();
             t.Wait();
 
         }

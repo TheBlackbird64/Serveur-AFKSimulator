@@ -1,5 +1,5 @@
 
-using AFKSimulator;
+using Serveur_AFKSimulator;
 
 namespace Serveur_AFKSimulator.Items
 {

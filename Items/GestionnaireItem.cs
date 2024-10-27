@@ -1,6 +1,6 @@
 ﻿
 
-using AFKSimulator;
+using Serveur_AFKSimulator;
 using System.Diagnostics;
 
 namespace Serveur_AFKSimulator.Items
@@ -62,9 +62,9 @@ namespace Serveur_AFKSimulator.Items
             int y = 0;
             (x, y) = CelluleLibre(map.TabBool(), Item.tabPosItem);
 
-            if (t == typeof(OrbeCouleur)) { return new OrbeCouleur(ElementMap.TrouverIdDispo(new List<ElementMap> (liste)), x, y); }
+            if (t == typeof(OrbeCouleur)) { return new OrbeCouleur(Identification.TrouverIdDispo(liste), x, y); }
             
-            else { return new OrbeCouleur(ElementMap.TrouverIdDispo(new List<ElementMap>(liste)), x, y); }
+            else { return new OrbeCouleur(Identification.TrouverIdDispo(liste), x, y); }
         }
 
         public static void Initialiser()

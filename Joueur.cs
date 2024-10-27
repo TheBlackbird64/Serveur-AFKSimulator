@@ -6,13 +6,12 @@ using Serveur_AFKSimulator.Items;
 using System.Linq;
 using Serveur_AFKSimulator;
 
-namespace AFKSimulator
+namespace Serveur_AFKSimulator
 {
     public class Joueur : ObjRecul
     {
 
         private Socket sock;
-        private Serveur serveur;
         public Partie? partie;
         private string msgpart = "";
 
@@ -39,11 +38,10 @@ namespace AFKSimulator
         }
 
 
-        public Joueur(Socket socket, int _id, Serveur serv) : base(_id, 0, 0)
+        public Joueur(Socket socket, int _id) : base(_id, 0, 0)
         {
 
             sock = socket;
-            serveur = serv;
             chrono = new Stopwatch();
 
             pseudo = "";
@@ -131,7 +129,7 @@ namespace AFKSimulator
         {
             // Vider les listes pouvant contenir le client
             suppr = true;
-            serveur.joueurListe.Remove(this);
+            Serveur.joueurListe.Remove(this);
 
             sock.Close();
         }
@@ -180,7 +178,7 @@ namespace AFKSimulator
                         // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
                         if (msg[3] != "-1")
                         {
-                            partie.listeProjectile.Add(new Projectile(TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, dirProjectile, partie, partie.map));
+                            partie.listeProjectile.Add(new Projectile(TrouverIdDispo(partie.listeProjectile), x, y, id, dirProjectile, partie, partie.map));
                         }
                     }
 

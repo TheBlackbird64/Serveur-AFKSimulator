@@ -1,4 +1,4 @@
-﻿using AFKSimulator;
+﻿using Serveur_AFKSimulator;
 using System.Diagnostics;
 
 namespace Serveur_AFKSimulator.Items

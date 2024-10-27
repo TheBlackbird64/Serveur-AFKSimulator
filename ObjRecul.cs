@@ -1,4 +1,4 @@
-﻿using AFKSimulator;
+﻿using Serveur_AFKSimulator;
 using System.ComponentModel;
 
 

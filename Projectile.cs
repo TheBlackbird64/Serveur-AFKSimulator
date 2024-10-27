@@ -1,5 +1,5 @@
 
-namespace AFKSimulator
+namespace Serveur_AFKSimulator
 {
     public class Projectile : ElementMap
     {
