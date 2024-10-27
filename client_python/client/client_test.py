@@ -80,7 +80,10 @@ if __name__ == "__main__":
     while True:
         m = "-1"
         
-        if (time.time() - p > 10):
+        #x += random.randint(-2, 2)
+        #y += random.randint(-2, 2)
+        
+        if (time.time() - p > 3):
             p = time.time()
             if (random.randint(0, 5) == 5):
                 m = "45"

@@ -90,6 +90,9 @@ namespace AFKSimulator
             }
         }
 
+        
+        public static int VitesseSync(int vitesse) => vitesse*(actualiserIntervalleMs / 10);
+
 
         public Partie()
         {

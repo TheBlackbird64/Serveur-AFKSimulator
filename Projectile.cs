@@ -5,7 +5,7 @@ namespace AFKSimulator
     {
         public int idJoueur { get; set; }
         public int direction { get; set; }
-        public int vitesse { get; set; } = 40;
+        public int vitesse { get; set; } = Partie.VitesseSync(8);
         public int degats { get; set; } = 10;
         public Partie partie { get; set; }
         public Map map { get; set; }
@@ -24,8 +24,8 @@ namespace AFKSimulator
         public override void Actualiser()
         {
 
-            x += Convert.ToInt32(Math.Round(Math.Cos(direction * Math.PI / 180.0) * vitesse));
-            y += Convert.ToInt32(Math.Round(Math.Sin(-direction * Math.PI / 180.0) * vitesse));
+            x += DepX(vitesse, direction);
+            y += DepY(vitesse, direction);
 
             // On gère les dégats quand il y a une collision avec un des joueurs, sauf celui qui a lancé le projectile sinon il est touché à la création du projectile (variable idJoueur)
             foreach (Joueur j in partie.listeJoueurs)
@@ -35,22 +35,14 @@ namespace AFKSimulator
                     if (Collision(this, j))
                     {
                         j.vie -= degats;
+                        j.Recul(direction);
                         suppr = true;
                         break;
                     }
                 }
             }
 
-            // Suppression si sortie de la map
-            if (x < Map.coinMapG || y < Map.coinMapH || Map.XToRow(x + largeur) >= Map.tailleMap || Map.YToRow(y + hauteur) >= Map.tailleMap) { suppr = true; }
-            else
-            {
-                // Collisions
-                if (Collision(this, map.TabBool()))
-                {
-                    suppr = true;
-                }
-            }
+            if (!suppr) { suppr = !DepPossible(map, x, y); }
 
         }
     }

@@ -10,6 +10,8 @@ namespace AFKSimulator
         public int hauteur { get; set; }
         public bool suppr { get; set; }
 
+        
+
         // Trouve un id pas utilisé parmi une liste d'éléments ElementMap (id != 0)
         public static int TrouverIdDispo(List<ElementMap> listeElem)
         {
@@ -80,6 +82,27 @@ namespace AFKSimulator
             (x, y) = CollisionGetPos(elem1, tabMap);
             return (x != -1 && y != -1);
         }
+
+        public bool DepPossible(Map m, int x, int y)
+        {
+            bool possible = true;
+            // Suppression si sortie de la map
+            if (x < Map.coinMapG || y < Map.coinMapH || Map.XToRow(x + largeur) >= Map.tailleMap || Map.YToRow(y + hauteur) >= Map.tailleMap) { possible = false; }
+            else
+            {
+                // Collisions
+                if (Collision(this, m.TabBool()))
+                {
+                    possible = false;
+                }
+            }
+
+            return possible;
+        }
+
+
+        public int DepX(int v, int dir) => Convert.ToInt32(Math.Round(Math.Cos(dir * Math.PI / 180.0) * v));
+        public int DepY(int v, int dir) => Convert.ToInt32(Math.Round(Math.Sin(-dir * Math.PI / 180.0) * v));
 
         // Fonction appelé à chaque étape du jeu pour actualiser les éléments (collisions, déplacements, ...)
         public abstract void Actualiser();

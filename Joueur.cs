@@ -4,10 +4,11 @@ using System.Text;
 using System.Diagnostics;
 using Serveur_AFKSimulator.Items;
 using System.Linq;
+using Serveur_AFKSimulator;
 
 namespace AFKSimulator
 {
-    public class Joueur : ElementMap
+    public class Joueur : ObjRecul
     {
 
         private Socket sock;
@@ -179,7 +180,7 @@ namespace AFKSimulator
                         // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
                         if (msg[3] != "-1")
                         {
-                            partie.listeProjectile.Add(new Projectile(ElementMap.TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, dirProjectile, partie, partie.map));
+                            partie.listeProjectile.Add(new Projectile(TrouverIdDispo(new List<ElementMap>(partie.listeProjectile)), x, y, id, dirProjectile, partie, partie.map));
                         }
                     }
 
@@ -192,7 +193,7 @@ namespace AFKSimulator
             }
         }
 
-        public void EnvoyerMessage(String msg)
+        public void EnvoyerMessage(string msg)
         {
             try
             {
@@ -213,6 +214,8 @@ namespace AFKSimulator
             // Verification recuperer item
             if (partie != null)
             {
+                //ActualiserRecul(partie.map);
+
                 if (Collision(this, Item.tabPosItem))
                 {
                     for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
@@ -236,7 +239,7 @@ namespace AFKSimulator
             }
         }
 
-        public void Log(String msg)
+        public void Log(string msg)
         {
             Console.WriteLine("  " + msg + " (id:" + id.ToString() + ")");
         }
