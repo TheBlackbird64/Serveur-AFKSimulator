@@ -5,20 +5,16 @@ namespace Serveur_AFKSimulator.Items
 {
     public class OrbeCouleur : Item
     {
-        public static int maxItems = 8;
-        public static int delaiApparition = 3;
-        public static Stopwatch chrono = new Stopwatch();
 
         private const int valAjoutCouleur = 17;
         public enum Couleur { Rouge, Vert, Bleu }
         public Couleur col;
 
-        public OrbeCouleur(int id, int x, int y) : base(id, x, y)
+        public OrbeCouleur(int id, int x, int y, Map map) : base(id, x, y, map)
         {
             largeur = 30;
             hauteur = 30;
 
-            if (! chrono.IsRunning) { chrono.Start(); }
 
             Random rnd = new Random();
             switch (rnd.Next(3))
@@ -55,9 +51,6 @@ namespace Serveur_AFKSimulator.Items
             suppr = true;
         }
 
-        public override string InfosItem()
-        {
-            return string.Join(Joueur.sep4, [id.ToString(), "OrbeCouleur", x.ToString(), y.ToString(), ((int)col).ToString()]) + Joueur.sep3;
-        }
+        public override string InfosItem() => string.Join(Client.sep4, [id.ToString(), x.ToString(), y.ToString(), ((int)col).ToString()]) + Client.sep3;
     }
 }

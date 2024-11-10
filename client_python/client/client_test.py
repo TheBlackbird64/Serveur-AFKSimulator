@@ -72,6 +72,15 @@ if __name__ == "__main__":
         print("Tentative de connexion.. ")
     print("\n  Connexion établie")
     c.envoi_message(["j","test"])
+    
+    b = True
+    tmp = ""
+    while b:
+        tmp = c.lire_message()
+        if len(tmp) > 0:
+            if tmp[0][0] == "p":
+                b = False
+    
     c.envoi_message(["r"])
     x = random.randint(500, 2000)
     y = random.randint(500, 2000)

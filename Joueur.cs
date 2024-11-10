@@ -8,29 +8,35 @@ using Serveur_AFKSimulator;
 
 namespace Serveur_AFKSimulator
 {
-    public class Joueur : ObjRecul
+    public class Joueur : ElementMove
     {
+        public const int nbProjectilesMax = 10;
+        private const int tempsRechargeMax = 1000;
 
-        private Socket sock;
-        public Partie? partie;
-        private string msgpart = "";
+        public Partie partie;
 
         public string pseudo { get; set; }
         public int vie { get; set; }
         public int colRouge { get; set; }
         public int colVert { get; set; }
         public int colBleu { get; set; }
-        public string couleur { get { return colToString(colRouge) + colToString(colVert) + colToString(colBleu); } }
+        public string couleur { get { return ColToString(colRouge) + ColToString(colVert) + ColToString(colBleu); } }
         public long tempsAfkMs { get { return chrono.ElapsedMilliseconds; } }
-        public bool connecte { get; set; } = true;
         public Stopwatch chrono { get; set; }
+        private Stopwatch chronoTempsRecharge { get; set; }
+        public int nbProjectiles { get; set; }
 
-        public const string sep1 = "|";
-        public const string sep2 = ",";
-        public const string sep3 = ";";
-        public const string sep4 = "!";
+        private bool mouvH { get; set; } = false;
+        private bool mouvB { get; set; } = false;
+        private bool mouvD { get; set; } = false;
+        private bool mouvG { get; set; } = false;
+        private double vitesseH { get; set; } // vitesse verticale
+        private double vitesseV { get; set; } // vitesse horizontale
+        private double acceleration {  get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
+        private double deceleration {  get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
 
-        public static string colToString(int col)
+
+        public static string ColToString(int col)
         {
             string c = col.ToString("X");
             if (c.Length == 1) { c = "0" + c; }
@@ -38,196 +44,142 @@ namespace Serveur_AFKSimulator
         }
 
 
-        public Joueur(Socket socket, int _id) : base(_id, 0, 0)
+        public Joueur(Partie partie, int _id, string pseudo) : base(_id, 0, 0, partie.map)
         {
+            Random rnd = new Random();
+            vie = 100;
+            nbProjectiles = nbProjectilesMax;
 
-            sock = socket;
-            chrono = new Stopwatch();
-
-            pseudo = "";
-            vie = 0;
             colRouge = 0;
             colVert = 0;
             colBleu = 0;
 
             largeur = 50;
             hauteur = 50;
+            x = Map.coinMapG - 25;
+            y = Map.coinMapH - 25;
 
-            Log("Client connecté");
-        }
-
-        public void ResetVars()
-        {
-            x = 0;
-            y = 0;
-            vie = 100;
-
-            colRouge = 0;
-            colVert = 0;
-            colBleu = 0;
-
-            if (chrono.IsRunning) { chrono.Restart(); }
-            else { chrono.Start(); }
-        }
-
-        public async void RecMessagesAsync()
-        {
-            while (connecte)
+            while (Collision(this, map.tabBool))
             {
-                byte[] buffer = new byte[1024];
-                string message = "";
+                x = rnd.Next(Map.coinMapG, Map.tailleMap * Map.tailleCellMap);
+                y = rnd.Next(Map.coinMapH, Map.tailleMap * Map.tailleCellMap);
+            }
+
+            vitesse = (int) Partie.ValeurSync(5);
+            acceleration = Partie.ValeurSync(0.1);
+            deceleration = 0.75;
+            vitesseH = 0;
+            vitesseV = 0;
+
+            chrono = new Stopwatch();
+            chronoTempsRecharge = new Stopwatch();
+            this.partie = partie;
+            this.pseudo = pseudo;
+            chrono.Start();
+            chronoTempsRecharge.Start();
+        }
+
+        public void TraiterMessages(string[] msg)
+        {
+            if (msg[0] == "a") // Actualiser position et éventuellement tir
+            {
+                bool err = false;
+                int dirProjectile = 0;
 
                 try
                 {
-                    int bytesRead = 1024;
-                    while (bytesRead == 1024)
-                    {
-                        bytesRead = 0;
-                        bytesRead = await sock.ReceiveAsync(buffer, SocketFlags.None);
-                        if (bytesRead > 0)
-                        {
-                            message += Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        }
-                        else
-                        {
-                            Log("Client deconnecte");
-                            connecte = false;
-                        }
-                    }
-
-                    // au cas ou le dernier message n'arrive pas complet, on garde ce qui est arrivé en mémoire pour le reconstituer
-                    if (message != "")
-                    {
-                        message = msgpart + message;
-                        msgpart = "";
-                    }
-
-                    string[] msgTab = message.Split(sep1);
-                    for (int i = 0; msgTab.Count() > i; i++)
-                    {
-                        if ((i == msgTab.Count() - 1) && (msgTab[i] != ""))
-                        {
-                            msgpart = msgTab[i];
-                        }
-                        else
-                        {
-                            TraiterMessages(msgTab[i].Split(sep2));
-                        }
-                    }
+                    dirProjectile = int.Parse(msg[5]);
                 }
-                catch (Exception e)
+                catch { err = true; }
+
+                if (!err)
                 {
-                    Log("Client deconnecte suite a une erreur: " + e.Message);
-                    connecte = false;
-                }
-            }
-
-            SupprimerClient();
-        }
-
-        public void SupprimerClient()
-        {
-            // Vider les listes pouvant contenir le client
-            suppr = true;
-            Serveur.joueurListe.Remove(this);
-
-            sock.Close();
-        }
-
-        public void TraiterMessages(String[] msg)
-        {
-            if (msg[0] == "j") // Jouer (mis en attente pour une partie)
-            {
-                if (chrono.IsRunning) { chrono.Reset(); }
-                pseudo = msg[1];
-                if ((!Partie.fileAttente.Contains(this)) && partie == null)
-                {
-                    Partie.fileAttente.Add(this);
-                }
-            }
-            else if (msg[0] == "a") // Actualiser position et éventuellement tir
-            {
-                
-                if (partie != null && partie.started && vie > 0)
-                {
-                    bool err = false;
-                    int dirProjectile = 0;
-                    int x2 = x;
-                    int y2 = y;
-                    try
+                    // Si le joueur bouge son chrono est remis à 0 (ou si il reçoit un projectile)
+                    if (msg[1] != "0" || msg[2] != "0" || msg[3] != "0" || msg[4] != "0")
                     {
-                        x2 = int.Parse(msg[1]);
-                        y2 = int.Parse(msg[2]);
-                        
-                        dirProjectile = int.Parse(msg[3]);
-                    }
-                    catch { err = true; }
-
-                    if (!err)
-                    {
-                        // Si le joueur bouge son chrono est remis à 0
-                        if (x != x2 || y != y2)
-                        {
-                            chrono.Restart();
-                        }
-
-                        x = x2;
-                        y = y2;
-
-                        // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
-                        // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
-                        if (msg[3] != "-1")
-                        {
-                            partie.listeProjectile.Add(new Projectile(TrouverIdDispo(partie.listeProjectile), x, y, id, dirProjectile, partie, partie.map));
-                        }
+                        chrono.Restart();
                     }
 
-                }
+                    // Deplacement (enregistrer dans des variables et après le faire dans Actualiser sinon ça dépendrait de la vitesse d'envoi du client)
+                    mouvH = msg[1] != "0"; // haut
+                    mouvB = msg[2] != "0"; // bas
+                    mouvD = msg[3] != "0"; // droite
+                    mouvG = msg[4] != "0"; // gauche
 
-            }
-            else if (msg[0] == "r") // Rejouer (aller dans la partie)
-            {
-                ResetVars();
+                    // Si msg[2] n'est pas égal à -1, c'est que cette valeur est la direction du projectile tiré
+                    // On crée le projectile aux coordonnés du joueur avec la direction indiquée dans le message
+                    if (msg[5] != "-1" && chronoTempsRecharge.ElapsedMilliseconds >= tempsRechargeMax && nbProjectiles > 0)
+                    {
+                        nbProjectiles--;
+                        chronoTempsRecharge.Restart();
+                        partie.listeProjectile.Add(new Projectile(TrouverIdDispo(partie.listeProjectile), x, y, id, dirProjectile, partie, partie.map));
+                    }
+                }
             }
         }
 
-        public void EnvoyerMessage(string msg)
+        public override void ObstacleTouche()
         {
-            try
-            {
-                sock.Send(Encoding.UTF8.GetBytes(msg + sep1));
-            }
-            catch
-            {
-                // Erreur lors de l'envoi d'un message au client, pas de déconnexion du client car cela risque de modifier une liste pendant son itération dans une boucle
-            }
-
+            // Qd un obstacle est touché on revient à la position précédente
+            x = xPrevious;
+            y = yPrevious;
         }
 
         public override void Actualiser()
         {
-            // Les actions du joueur sont controlés par la partie réseau, fonction RecMessagesAsync()
-            // Mettre ici éventuellement un anticheat (vérif de positions pour vois si le joueur passe dans un mur ou si sa vitesse est trop importante
+            if (mouvH) // haut
+            {
+                vitesseV -= acceleration;
+                if (vitesseV < -1) { vitesseV = -1; }
+            }
+            if (mouvB) // bas
+            {
+                vitesseV += acceleration;
+                if (vitesseV > 1) { vitesseV = 1; }
+            }
+            if (mouvD) // droite
+            {
+                vitesseH += acceleration;
+                if (vitesseH > 1) { vitesseH = 1; }
+            }
+            if (mouvG) // gauche
+            {
+                vitesseH -= acceleration;
+                if (vitesseH < -1) { vitesseH = -1; }
+            }
+
+            if (!(mouvH || mouvB)) 
+            { 
+                vitesseV *= deceleration;
+                if (Math.Abs(vitesseV) < 0.025) { vitesseV = 0; }
+            }
+            if (!(mouvG || mouvD))
+            { 
+                vitesseH *= deceleration;
+                if (Math.Abs(vitesseH) < 0.025) { vitesseH = 0; }
+            }
+
+            DeplacerX((int) (vitesseH * vitesse));
+            DeplacerY((int) (vitesseV * vitesse));
+
+            base.Actualiser();
 
             // Verification recuperer item
-            if (partie != null)
+            // On vérifie dans le tableau si un touché, si c'est le cas pour savoir lequel on doit parcourir toute la liste
+            if (Collision(this, Item.tabPosItem))
             {
-                //ActualiserRecul(partie.map);
-
-                if (Collision(this, Item.tabPosItem))
+                for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
                 {
-                    for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
+                    for (int j = 0; j < GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]].Count; j++)
                     {
-                        for (int j = 0; j < GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]].Count; j++)
+                        if (Collision(this, GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j]))
                         {
-                            if (Collision(this, GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j]))
-                            {
-                                GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j].RecupererItem(this);
-                            }
+                            GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j].RecupererItem(this);
                         }
                     }
                 }
             }
+
 
             if (vie <= 0)
             {
@@ -235,11 +187,6 @@ namespace Serveur_AFKSimulator
                 x = 0;
                 y = 0;
             }
-        }
-
-        public void Log(string msg)
-        {
-            Console.WriteLine("  " + msg + " (id:" + id.ToString() + ")");
         }
     }
 }

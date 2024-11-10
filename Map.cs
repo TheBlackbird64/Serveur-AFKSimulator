@@ -15,18 +15,41 @@ namespace Serveur_AFKSimulator
         public const double valInf = 0.6;
         public const int nbVoisins = 3;
         public const int nbDec = 3;
-        public double[,] tabObstacle = new double[tailleMap, tailleMap];
+        private double[,] tabObstacle = new double[tailleMap, tailleMap];
+        public bool[,] tabBool = new bool[tailleMap, tailleMap];
 
         // Convertit une coordonnée x en indice de ligne de tableau de taille tailleMap.
-        public static int XToRow(int x) => (x - coinMapG) / tailleCellMap;
-        public static int YToRow(int y) => (y - coinMapH) / tailleCellMap;
-        
+        public static int XToRow(int x) => Convert.ToInt32(Math.Floor(((double) (x - coinMapG)) / ((double) tailleCellMap)));
+        public static int YToRow(int y) => Convert.ToInt32(Math.Floor(((double) (y - coinMapG)) / ((double) tailleCellMap)));
+
 
         public Map(int graine)
         {
             valRnd = graine;
         }
 
+        public void setTabObstacle(double[,] tab)
+        {
+            tabObstacle = tab;
+            for (int i = 0; tailleMap > i; i++)
+            {
+                for (int j = 0; tailleMap > j; j++)
+                {
+                    tabBool[i, j] = tabObstacle[i, j] >= valInf;
+                }
+            }
+        }
+
+        public void setTabObstacle(int i, int j, double val)
+        {
+            tabObstacle[i, j] = val;
+            tabBool[i, j] = tabObstacle[i, j] >= valInf;
+        }
+
+        public double[,] getTabObstacle() => tabObstacle;
+
+
+        // Fonctions de generation de la map
         // Générateur congruentiel linéaire
         public long GenRnd()
         {
@@ -51,10 +74,9 @@ namespace Serveur_AFKSimulator
             {
                 for (int j = 0; tailleMap > j; j++)
                 {
-                    tabObstacle[i, j] = GenRange(-1, 1);
+                    setTabObstacle(i, j, GenRange(-1, 1));
                 }
             }
-
         }
 
         public List<double> TabVoisins(double[,] tab, int i, int j)
@@ -106,20 +128,6 @@ namespace Serveur_AFKSimulator
 
             if (n > 1) { return GenLisserTab(tabLisse, n - 1); }
             else { return tabLisse; }
-        }
-
-        public bool[,] TabBool()
-        {
-            bool[,] tabB = new bool[tailleMap, tailleMap];
-
-            for (int i = 0; tailleMap > i; i++)
-            {
-                for (int j = 0; tailleMap > j; j++)
-                {
-                    tabB[i, j] = tabObstacle[i, j] >= valInf;
-                }
-            }
-            return tabB;
         }
     }
 }

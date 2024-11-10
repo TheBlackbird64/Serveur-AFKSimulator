@@ -19,7 +19,7 @@ namespace Serveur_AFKSimulator
         private static Socket listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp); //IPV6 : AddressFamily.InterNetworkV6;
 
         // VARIABLES AUTRES
-        public static List<Joueur> joueurListe { get; set; } = new List<Joueur>();
+        public static List<Client> clientListe { get; set; } = new List<Client>();
 
 
         public static async Task Start()
@@ -34,8 +34,8 @@ namespace Serveur_AFKSimulator
             while (true)
             {
 
-                Joueur cli = new Joueur(await listener.AcceptAsync(), Identification.TrouverIdDispo(joueurListe));
-                joueurListe.Add(cli);
+                Client cli = new Client(await listener.AcceptAsync(), Identification.TrouverIdDispo(clientListe));
+                clientListe.Add(cli);
 
                 cli.RecMessagesAsync();
             }

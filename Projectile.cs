@@ -1,48 +1,53 @@
 
 namespace Serveur_AFKSimulator
 {
-    public class Projectile : ElementMap
+    public class Projectile : ElementMove
     {
         public int idJoueur { get; set; }
         public int direction { get; set; }
-        public int vitesse { get; set; } = Partie.VitesseSync(8);
-        public int degats { get; set; } = 10;
+        public int degats { get; set; } = 20;
         public Partie partie { get; set; }
-        public Map map { get; set; }
 
 
-        public Projectile(int id, int x, int y, int idJoueur, int direction, Partie partie, Map map) : base(id, x, y)
+        public Projectile(int id, int x, int y, int idJoueur, int direction, Partie partie, Map map) : base(id, x, y, map)
         {
             this.idJoueur = idJoueur;
             this.direction = direction;
             this.partie = partie;
             largeur = 25;
             hauteur = 25;
-            this.map = map;
+            vitesse = (int) Partie.ValeurSync(8);
+        }
+
+
+        public override void ObstacleTouche()
+        {
+            suppr = true;
         }
 
         public override void Actualiser()
         {
 
-            x += DepX(vitesse, direction);
-            y += DepY(vitesse, direction);
+            Deplacer(vitesse, direction);
 
             // On gère les dégats quand il y a une collision avec un des joueurs, sauf celui qui a lancé le projectile sinon il est touché à la création du projectile (variable idJoueur)
-            foreach (Joueur j in partie.listeJoueurs)
+            foreach (Client c in partie.listeClient)
             {
-                if (idJoueur != j.id)
-                {
-                    if (Collision(this, j))
+                if (c.joueur != null) {
+                    Joueur j = c.joueur;
+                    if (idJoueur != j.id)
                     {
-                        j.vie -= degats;
-                        j.Recul(direction);
-                        suppr = true;
-                        break;
+                        if (Collision(this, j))
+                        {
+                            j.vie -= degats;
+                            j.Recul(direction);
+                            j.chrono.Restart();
+                            suppr = true;
+                            break;
+                        }
                     }
                 }
             }
-
-            if (!suppr) { suppr = !DepPossible(map, x, y); }
 
         }
     }

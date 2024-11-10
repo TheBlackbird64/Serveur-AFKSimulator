@@ -8,7 +8,7 @@ namespace Serveur_AFKSimulator.Items
     {
         public static bool[,] tabPosItem = new bool[Map.tailleMap, Map.tailleMap];
 
-        public Item(int id, int x, int y) : base(id, x, y)
+        public Item(int id, int x, int y, Map map) : base(id, x, y, map)
         {
             tabPosItem[Map.XToRow(x), Map.YToRow(y)] = true;
         }

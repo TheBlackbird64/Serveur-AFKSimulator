@@ -10,7 +10,7 @@ namespace Serveur_AFKSimulator.Items
         // Variables
         public static bool initialise = false;
 
-        public struct DataItems
+        public struct DataItems // Liste de variables de classe pour chaque type d'item
         {
             public int tpsApparitionMs;
             public int maxItem;
@@ -32,11 +32,13 @@ namespace Serveur_AFKSimulator.Items
         // Ces 2 arrays sont à modifier pour chaque classe fille de Item
         // Modifier aussi la fonction CreerInstances
         public static Type[] tabTypes = [
-            typeof(OrbeCouleur)
+            typeof(OrbeCouleur),
+            typeof(Recharge)
             ];
 
         public static DataItems[] tabVariables = [
-            new DataItems(2000, 13, new Stopwatch())
+            new DataItems(2000, 13, new Stopwatch()),
+            new DataItems(2000, 10, new Stopwatch())
             ];
 
 
@@ -60,11 +62,11 @@ namespace Serveur_AFKSimulator.Items
         {
             int x = 0;
             int y = 0;
-            (x, y) = CelluleLibre(map.TabBool(), Item.tabPosItem);
+            (x, y) = CelluleLibre(map.tabBool, Item.tabPosItem);
 
-            if (t == typeof(OrbeCouleur)) { return new OrbeCouleur(Identification.TrouverIdDispo(liste), x, y); }
-            
-            else { return new OrbeCouleur(Identification.TrouverIdDispo(liste), x, y); }
+            // ligne à dupliquer pour chaque type
+            if (t == typeof(OrbeCouleur)) { return new OrbeCouleur(Identification.TrouverIdDispo(liste), x, y, map); }
+            else { return new Recharge(Identification.TrouverIdDispo(liste), x, y, map); }
         }
 
         public static void Initialiser()

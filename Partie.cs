@@ -8,7 +8,7 @@ namespace Serveur_AFKSimulator
     public class Partie
     {
         public static List<Partie> listePartie = new List<Partie>();
-        public static List<Joueur> fileAttente = new List<Joueur>();
+        public static List<Client> fileAttente = new List<Client>();
         public const int nbJoueursMin = 1; // debug (5)
         public const int nbJoueursMax = 10;
         public const int actualiserIntervalleMs = 50;
@@ -16,12 +16,13 @@ namespace Serveur_AFKSimulator
         public const int tempsSupprPartie = 5;
 
         // éléments du jeu
-        public List<Joueur> listeJoueurs { get; set; }
+        public List<Client> listeClient { get; set; }
+        public bool verrouClient { get; set; } = false; // Pour éviter qu'un client soit supprimé pendant que la partie s'actualise, ce qui ferait planter le serveur
         public List<Projectile> listeProjectile { get; set; }
         public Stopwatch chrono { get; set; }
         public Map map { get; set; }
 
-        public int nbJoueurs { get { return listeJoueurs.Count; } }
+        public int nbJoueurs { get { return listeClient.Count; } }
         public int graine { get; set; }
         public bool suppr = false;
         public bool started { get; set; }
@@ -34,8 +35,6 @@ namespace Serveur_AFKSimulator
             while (true)
             {
                 await Task.Delay(actualiserIntervalleMs);
-
-                SupprimerElementsMap<Joueur>(fileAttente);
 
                 foreach (Partie p in new List<Partie>(listePartie))
                 {
@@ -50,26 +49,24 @@ namespace Serveur_AFKSimulator
                         // Remplit les parties en cours
                         while ((p.nbJoueurs < nbJoueursMax) && (fileAttente.Count > 0))
                         {
-                            Joueur j = fileAttente[0];
-                            p.listeJoueurs.Add(j);
+                            Client c = fileAttente[0];
+                            p.listeClient.Add(c);
                             fileAttente.RemoveAt(0);
 
-                            if (p.started) { p.StartClient(j); }
+                            if (p.started) { p.StartClient(c); }
                         }
 
                         // Demarre les parties remplies
-                        if ((p.listeJoueurs.Count >= nbJoueursMin) && !p.started)
+                        if ((p.listeClient.Count >= nbJoueursMin) && !p.started)
                         {
                             p.started = true;
                             Console.WriteLine("-- Partie démarrée (" + listePartie.Count + " parties en cours)");
 
-                            foreach (Joueur j in p.listeJoueurs)
+                            foreach (Client c in p.listeClient)
                             {
-                                p.StartClient(j);
+                                p.StartClient(c);
                             }
                         }
-
-                        SupprimerElementsMap<Joueur>(p.listeJoueurs);
                     }
                 }
 
@@ -91,14 +88,14 @@ namespace Serveur_AFKSimulator
         }
 
         
-        public static int VitesseSync(int vitesse) => vitesse*(actualiserIntervalleMs / 10);
+        public static double ValeurSync(double valPar10Ms) => valPar10Ms * (actualiserIntervalleMs / 10);
 
 
         public Partie()
         {
             Console.WriteLine("Partie créée");
 
-            listeJoueurs = new List<Joueur>();
+            listeClient = new List<Client>();
             listeProjectile = new List<Projectile>();
 
             chrono = new Stopwatch();
@@ -107,7 +104,7 @@ namespace Serveur_AFKSimulator
             map = new Map(graine);
 
             map.GenTab();
-            map.tabObstacle = map.GenLisserTab(map.tabObstacle, 2);
+            map.setTabObstacle(map.GenLisserTab(map.getTabObstacle(), 2));
 
             if (! GestionnaireItem.initialise) { GestionnaireItem.Initialiser(); }
         }
@@ -119,79 +116,100 @@ namespace Serveur_AFKSimulator
 
         public void SupprimerPartie()
         {
-            foreach (Joueur j in listeJoueurs)
+            verrouClient = true;
+            foreach (Client c in listeClient)
             {
-                j.partie = null;
+                c.partie = null;
             }
+            verrouClient = false;
+
             listeProjectile.Clear();
             listePartie.Remove(this);
             suppr = true;
         }
 
         // Commence une partie, prévient les clients du début de la partie
-        public void StartClient(Joueur j)
+        public void StartClient(Client c)
         {
-            j.partie = this;
-            j.EnvoyerMessage(string.Join(Joueur.sep2, ["p", graine.ToString(), j.id]));
+            c.partie = this;
+            c.EnvoyerMessage(string.Join(Client.sep2, ["p", graine.ToString(), c.id]));
         }
 
 
         // Actualisation de toute la map (positions, vies, ..)
         public void Actualiser()
         {
+            verrouClient = true;
+
             // Items 
             string infosItems = "";
+            List<string> infosItemsTab = new List<string>();
             for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
             {
-                SupprimerElementsMap<Item>(GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]]);
+                SupprimerElementsMap(GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]]);
 
                 foreach (Item It in GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]])
                 {
                     infosItems += It.InfosItem();
                 }
-                    
+
+                if (infosItems.Length == 0) { infosItems = "*"; }
+                infosItemsTab.Add(infosItems);
+                infosItems = "";
             }
+            infosItems = string.Join(Client.sep2, infosItemsTab);
+
             GestionnaireItem.Actualiser(map);
-            if (infosItems.Length == 0) { infosItems = "*"; }
 
 
-
-            // Actualisation des ElementMap 
+            // Actualisation des projectiles 
             // Pour optimiser, l'actualisation des objets se fait dans la même boucle que celle qui sert à récupérer les infos à envoyer aux client pour les actualiser
-            SupprimerElementsMap<Projectile>(listeProjectile);
+            SupprimerElementsMap(listeProjectile);
             string infosProjectiles = "";
             foreach (Projectile p in new List<Projectile>(listeProjectile))
             {
                 p.Actualiser();
-                infosProjectiles += string.Join(Joueur.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString(), p.idJoueur.ToString()]) + Joueur.sep3;
+                infosProjectiles += string.Join(Client.sep4, [p.id.ToString(), p.x.ToString(), p.y.ToString(), p.direction.ToString(), p.idJoueur.ToString()]) + Client.sep3;
             }
             if (infosProjectiles.Length == 0) { infosProjectiles = "*"; }
+
 
             // Envoi du message d'actualisation pour les clients : Construction du message + vérif si y'en a un qui a gagné
             string infosJoueurs = "";
             Joueur? gagnant = null;
-            foreach (Joueur j in listeJoueurs)
+            foreach (Client c in listeClient)
             {
-                if (j.chrono.Elapsed.TotalSeconds > tempsVictoire) { gagnant = j; break; }
-                j.Actualiser();
+                if (c.joueur != null)
+                {
+                    Joueur j = c.joueur;
 
-                infosJoueurs += string.Join(Joueur.sep4, [j.id.ToString(), j.pseudo, j.tempsAfkMs.ToString(), j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur]) + Joueur.sep3;
+                    if (j.vie <= 0) { c.joueur = null; }
+                    else
+                    {
+                        if (j.chrono.Elapsed.TotalSeconds > tempsVictoire) { gagnant = j; break; }
+                        j.Actualiser();
+
+                        infosJoueurs += string.Join(Client.sep4, [j.id.ToString(), j.pseudo, j.tempsAfkMs.ToString(), j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur, j.nbProjectiles]) + Client.sep3;
+                    }
+                }
             }
+            if (infosJoueurs.Length == 0) { infosJoueurs = "*"; }
+
 
             if (gagnant == null)
             {
                 // Envoi du message d'actualisation pour les clients
-                foreach (Joueur j in listeJoueurs)
+                foreach (Client c in listeClient)
                 {
-                    j.EnvoyerMessage(string.Join(Joueur.sep2, ["a", infosJoueurs, infosProjectiles, infosItems]));
+                    c.EnvoyerMessage(string.Join(Client.sep2, ["a", infosJoueurs, infosProjectiles, infosItems]));
                 }
             }
             else
             {
                 // Envoi du message de fin de partie
-                foreach (Joueur j in listeJoueurs)
+                foreach (Client c in listeClient)
                 {
-                    j.EnvoyerMessage(string.Join(Joueur.sep2, ["g", gagnant.pseudo]));
+                    c.EnvoyerMessage(string.Join(Client.sep2, ["g", gagnant.pseudo]));
                 }
 
                 Console.WriteLine("Partie terminée (id gagnant : " + gagnant.id.ToString() + " )");
@@ -200,21 +218,21 @@ namespace Serveur_AFKSimulator
             }
 
 
-
-
             // Supprime la partie si elle est inutilisé
             if (!chrono.IsRunning)
             {
-                if (listeJoueurs.Count == 0) { chrono.Restart(); }
+                if (listeClient.Count == 0) { chrono.Restart(); }
             }
             else
             {
-                if (listeJoueurs.Count != 0) { chrono.Stop(); }
+                if (listeClient.Count != 0) { chrono.Stop(); }
                 if (chrono.Elapsed.TotalSeconds > tempsSupprPartie)
                 {
                     SupprimerPartie();
                 }
             }
+
+            verrouClient = false;
         }
     }
 }
