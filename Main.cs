@@ -8,7 +8,6 @@ namespace Serveur_AFKSimulator
         {
             Task t = Serveur.Start();
             t.Wait();
-
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Serveur_AFKSimulator
     {
         public static List<Partie> listePartie = new List<Partie>();
         public static List<Client> fileAttente = new List<Client>();
-        public const int nbJoueursMin = 1; // debug (5)
+        public const int nbJoueursMin = 5; 
         public const int nbJoueursMax = 10;
         public const int actualiserIntervalleMs = 50;
         public const int tempsVictoire = 120;

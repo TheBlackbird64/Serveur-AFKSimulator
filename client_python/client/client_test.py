@@ -14,8 +14,8 @@ class ClientV3:
             f_logs = open("logs_client.txt", "w")
             f_logs.close()
         
-        self.host = "127.0.0.1"
-        self.port = 10000
+        self.host = "services-afksimulator.alwaysdata.net"
+        self.port = 8300
         self.liste_msg = []
         self.caractere_sep_infos = ","
         self.caractere_sep_msg = "|"
@@ -24,7 +24,7 @@ class ClientV3:
     
     def connexion(self):
         try:
-            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connection = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             self.connection.settimeout(5)
             self.connection.connect((self.host, self.port))
         except:
