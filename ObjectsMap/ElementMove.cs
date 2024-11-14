@@ -1,18 +1,17 @@
-﻿using Serveur_AFKSimulator;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 
-namespace Serveur_AFKSimulator
+namespace Serveur_AFKSimulator.ObjectsMap
 {
     // Tout les éléments qui peuvent bouger héritent de cette classe qui contient toutes les fonctions de mouvement.
     public abstract class ElementMove : ElementMap
     {
-        public int vitesse {  get; set; } // Vitesse de déplacement
+        public int vitesse { get; set; } // Vitesse de déplacement
 
         public int vitRecul { get; set; } // Vitesse de recul
         public int vitRalentiRecul { get; set; } // Ralentissement à chaque actualisation pour que l'objet ne recule pas à l'infini
         public int directionRecul { get; set; } // direction du recul
-        public int xPrevious {  get; set; } // Valeur de X au mouvement précédente (pr pouvoir annuler un déplacement)
+        public int xPrevious { get; set; } // Valeur de X au mouvement précédente (pr pouvoir annuler un déplacement)
         public int yPrevious { get; set; } // Pareil pr Y
 
 
@@ -20,7 +19,7 @@ namespace Serveur_AFKSimulator
         {
 
 
-            vitRalentiRecul = (int) Partie.ValeurSync(1);
+            vitRalentiRecul = (int)Partie.ValeurSync(1);
             vitRecul = 0;
             directionRecul = 0;
             xPrevious = x;
@@ -58,7 +57,7 @@ namespace Serveur_AFKSimulator
                 if (Collision(this, map.tabBool))
                 {
                     x = xPrevious;
-                    DeplacerX(depx - 1*(depx/Math.Abs(depx)));
+                    DeplacerX(depx - 1 * (depx / Math.Abs(depx)));
                 }
             }
         }
@@ -81,13 +80,13 @@ namespace Serveur_AFKSimulator
         // Initialise un mouvement de recul 
         public void Recul(int dir)
         {
-            vitRecul = (int) Partie.ValeurSync(8);
+            vitRecul = (int)Partie.ValeurSync(8);
             directionRecul = dir;
         }
 
 
 
-        public override void Actualiser() 
+        public override void Actualiser()
         {
             // Recul
             ResetPrevious();

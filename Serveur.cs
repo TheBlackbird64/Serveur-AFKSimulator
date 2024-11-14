@@ -8,14 +8,13 @@ namespace Serveur_AFKSimulator
     public static class Serveur
     {
         // VARIABLES DE CONFIGURATION DU SERVEUR
-        private static int maxConnexions = 100;
-        private static int port = 8300;
+        public static int maxConnexions;
+        public static int port;
 
         // VARIABLES POUR LE SOCKET (on touche pas, ça a l'air de marcher)
-        private static IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
-        private static IPAddress ipAddr = IPAddress.Parse("127.0.0.1"); //IPv6Any; //
-        private static IPEndPoint localEndPoint = new IPEndPoint(ipAddr, port);
-        private static Socket listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp); //AddressFamily.InterNetworkV6
+        private static IPAddress? ipAddr; 
+        private static IPEndPoint? localEndPoint;
+        private static Socket? listener; 
 
         // VARIABLES AUTRES
         public static List<Client> clientListe { get; set; } = new List<Client>();
@@ -23,6 +22,10 @@ namespace Serveur_AFKSimulator
 
         public static async Task Start()
         {
+            ipAddr = IPAddress.Parse("127.0.0.1"); //IPv6Any; //
+            localEndPoint = new IPEndPoint(ipAddr, port);
+            listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp); //AddressFamily.InterNetworkV6
+
             listener.Bind(localEndPoint);
             listener.Listen(maxConnexions);
 

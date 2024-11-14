@@ -55,7 +55,7 @@ namespace Serveur_AFKSimulator.Items
             }
             while (tab1[x, y] || tab2[x, y]);
 
-            return (x * Map.tailleCellMap + Map.coinMapG, y * Map.tailleCellMap + Map.coinMapH);
+            return (x, y);
         }
 
         public static Item CreerInstances(Type t, Map map, List<Item> liste)

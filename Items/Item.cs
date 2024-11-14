@@ -1,5 +1,4 @@
-
-using Serveur_AFKSimulator;
+using Serveur_AFKSimulator.ObjectsMap;
 
 namespace Serveur_AFKSimulator.Items
 {
@@ -8,9 +7,9 @@ namespace Serveur_AFKSimulator.Items
     {
         public static bool[,] tabPosItem = new bool[Map.tailleMap, Map.tailleMap];
 
-        public Item(int id, int x, int y, Map map) : base(id, x, y, map)
+        public Item(int id, int x, int y, Map map) : base(id, x * Map.tailleCellMap + Map.coinMapG, y * Map.tailleCellMap + Map.coinMapH, map)
         {
-            tabPosItem[Map.XToRow(x), Map.YToRow(y)] = true;
+            tabPosItem[x, y] = true;
         }
 
         ~Item()

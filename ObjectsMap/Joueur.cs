@@ -4,14 +4,17 @@ using System.Text;
 using System.Diagnostics;
 using Serveur_AFKSimulator.Items;
 using System.Linq;
-using Serveur_AFKSimulator;
 
-namespace Serveur_AFKSimulator
+namespace Serveur_AFKSimulator.ObjectsMap
 {
     public class Joueur : ElementMove
     {
-        public const int nbProjectilesMax = 10;
-        private const int tempsRechargeMax = 1000;
+        public static int nbProjectilesMax = 10;
+        public static int tempsRechargeMax = 1000;
+        public static int vieMax = 100;
+        public static int larg = 50;
+        public static int haut = 50;
+
 
         public Partie partie;
 
@@ -32,8 +35,8 @@ namespace Serveur_AFKSimulator
         private bool mouvG { get; set; } = false;
         private double vitesseH { get; set; } // vitesse verticale
         private double vitesseV { get; set; } // vitesse horizontale
-        private double acceleration {  get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
-        private double deceleration {  get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
+        private double acceleration { get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
+        private double deceleration { get; set; } // deceleration du joueur (pour que le mouvement soit fluide)
 
 
         public static string ColToString(int col)
@@ -47,15 +50,15 @@ namespace Serveur_AFKSimulator
         public Joueur(Partie partie, int _id, string pseudo) : base(_id, 0, 0, partie.map)
         {
             Random rnd = new Random();
-            vie = 100;
+            vie = vieMax;
             nbProjectiles = nbProjectilesMax;
 
             colRouge = 0;
             colVert = 0;
             colBleu = 0;
 
-            largeur = 50;
-            hauteur = 50;
+            largeur = larg;
+            hauteur = haut;
             x = Map.coinMapG - 25;
             y = Map.coinMapH - 25;
 
@@ -148,19 +151,19 @@ namespace Serveur_AFKSimulator
                 if (vitesseH < -1) { vitesseH = -1; }
             }
 
-            if (!(mouvH || mouvB)) 
-            { 
+            if (!(mouvH || mouvB))
+            {
                 vitesseV *= deceleration;
                 if (Math.Abs(vitesseV) < 0.025) { vitesseV = 0; }
             }
             if (!(mouvG || mouvD))
-            { 
+            {
                 vitesseH *= deceleration;
                 if (Math.Abs(vitesseH) < 0.025) { vitesseH = 0; }
             }
 
-            DeplacerX((int) (vitesseH * vitesse));
-            DeplacerY((int) (vitesseV * vitesse));
+            DeplacerX((int)(vitesseH * vitesse));
+            DeplacerY((int)(vitesseV * vitesse));
 
             base.Actualiser();
 

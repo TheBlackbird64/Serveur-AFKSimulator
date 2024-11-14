@@ -2,6 +2,7 @@
 
 using System.Diagnostics;
 using Serveur_AFKSimulator.Items;
+using Serveur_AFKSimulator.ObjectsMap;
 
 namespace Serveur_AFKSimulator
 {
@@ -9,11 +10,11 @@ namespace Serveur_AFKSimulator
     {
         public static List<Partie> listePartie = new List<Partie>();
         public static List<Client> fileAttente = new List<Client>();
-        public const int nbJoueursMin = 3;
-        public const int nbJoueursMax = 7;
-        public const int actualiserIntervalleMs = 50;
-        public const int tempsVictoire = 61;
-        public const int tempsSupprPartie = 5;
+        public static int nbJoueursMin;
+        public static int nbJoueursMax;
+        public static int actualiserIntervalleMs;
+        public static int tempsVictoire;
+        public static int tempsSupprPartie;
 
         // éléments du jeu
         public List<Client> listeClient { get; set; }
@@ -121,7 +122,6 @@ namespace Serveur_AFKSimulator
 
         public void SupprimerPartie()
         {
-            Console.WriteLine("test");
             verrouClient = true;
             foreach (Client c in listeClient)
             {
@@ -216,6 +216,7 @@ namespace Serveur_AFKSimulator
                 foreach (Client c in listeClient)
                 {
                     c.EnvoyerMessage(string.Join(Client.sep2, ["g", gagnant.pseudo]));
+                    c.joueur = null;
                 }
 
                 Console.WriteLine("Partie terminée (id gagnant : " + gagnant.id.ToString() + " )");

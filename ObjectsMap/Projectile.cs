@@ -1,5 +1,4 @@
-
-namespace Serveur_AFKSimulator
+namespace Serveur_AFKSimulator.ObjectsMap
 {
     public class Projectile : ElementMove
     {
@@ -16,7 +15,7 @@ namespace Serveur_AFKSimulator
             this.partie = partie;
             largeur = 25;
             hauteur = 25;
-            vitesse = (int) Partie.ValeurSync(8);
+            vitesse = (int)Partie.ValeurSync(8);
         }
 
 
@@ -33,7 +32,8 @@ namespace Serveur_AFKSimulator
             // On gère les dégats quand il y a une collision avec un des joueurs, sauf celui qui a lancé le projectile sinon il est touché à la création du projectile (variable idJoueur)
             foreach (Client c in partie.listeClient)
             {
-                if (c.joueur != null) {
+                if (c.joueur != null)
+                {
                     Joueur j = c.joueur;
                     if (idJoueur != j.id)
                     {

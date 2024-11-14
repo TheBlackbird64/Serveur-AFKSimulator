@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Serveur_AFKSimulator.ObjectsMap;
 
 namespace Serveur_AFKSimulator
 {
@@ -14,7 +15,7 @@ namespace Serveur_AFKSimulator
         private Socket sock;
         private string msgpart = "";
         public bool connecte { get; set; } = true;
-        public const int tempsSupprClient = 30;
+        public static int tempsSupprClient;
 
         // SEPARATEURS MESSAGES RESEAU
         public const string sep1 = "|";

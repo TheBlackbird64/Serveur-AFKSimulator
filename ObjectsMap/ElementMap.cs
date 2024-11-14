@@ -1,6 +1,4 @@
-
-
-namespace Serveur_AFKSimulator
+namespace Serveur_AFKSimulator.ObjectsMap
 {
     public abstract class ElementMap : Identification
     {
@@ -26,7 +24,7 @@ namespace Serveur_AFKSimulator
 
         public bool Collision(ElementMap elem1, ElementMap elem2)
         {
-            return (elem1.x + elem1.largeur > elem2.x) && (elem1.x < elem2.x + elem2.largeur) && (elem1.y + elem1.hauteur > elem2.y) && (elem1.y < elem2.y + elem2.hauteur);
+            return elem1.x + elem1.largeur > elem2.x && elem1.x < elem2.x + elem2.largeur && elem1.y + elem1.hauteur > elem2.y && elem1.y < elem2.y + elem2.hauteur;
         }
 
         public bool Collision(ElementMap elem1, bool[,] tabMap)
