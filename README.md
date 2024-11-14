@@ -6,4 +6,4 @@ Ceci est le code du serveur de AFK Simulator. Si vous souhaitez télécharger le
 
 ## Liens utiles
 
-Repository client: https://github.com/TheBlackbird64/Client-AFKSimulator
+[Repository client](https://github.com/TheBlackbird64/Client-AFK_Simulator)
