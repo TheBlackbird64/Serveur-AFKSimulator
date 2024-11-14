@@ -1,10 +1,11 @@
 import socket
 import sys
 import time
+import random
 from select import *
 
 class ClientV3:
-    def __init__(self, allow_debug=False, allow_logs=False, timeout_msg=0):
+    def __init__(self, allow_debug=True, allow_logs=False, timeout_msg=0.001):
         # debug
         if allow_debug:
             f_debug = open("erreurs_client.txt", "w")
@@ -14,7 +15,7 @@ class ClientV3:
             f_logs.close()
         
         self.host = "127.0.0.1"
-        self.port = 10000
+        self.port = 8300
         self.liste_msg = []
         self.caractere_sep_infos = ","
         self.caractere_sep_msg = "|"
@@ -70,6 +71,38 @@ if __name__ == "__main__":
     while not c.connexion():
         print("Tentative de connexion.. ")
     print("\n  Connexion établie")
+    c.envoi_message(["j","test"])
+    
+    b = True
+    tmp = ""
+    while b:
+        tmp = c.lire_message()
+        if len(tmp) > 0:
+            if tmp[0][0] == "p":
+                b = False
+    
+    c.envoi_message(["r"])
+    x = random.randint(500, 2000)
+    y = random.randint(500, 2000)
+    
+    p = time.time()
     while True:
-        c.lire_message()
-        c.envoi_message(input(">>> ").split(c.caractere_sep_infos))
+        m = "-1"
+        
+        #x += random.randint(-2, 2)
+        #y += random.randint(-2, 2)
+        
+        if (time.time() - p > 3):
+            p = time.time()
+            if (random.randint(0, 5) == 5):
+                m = "45"
+            
+            
+        c.envoi_message(["a", str(x), str(y), m])
+        
+        a = c.lire_message()
+        if a != []:
+            print(a)
+        if a == -1:
+            quit()
+            exit()

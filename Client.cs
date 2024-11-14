@@ -101,9 +101,9 @@ namespace Serveur_AFKSimulator
 
                 if (! chrono.IsRunning) { chrono.Start(); }
             }
-            while (chrono.Elapsed.TotalSeconds < tempsSupprClient);
+            while (chrono.Elapsed.TotalSeconds < tempsSupprClient && partie != null);
 
-            if (partie != null) { while (partie.verrouClient) { } }
+            
             SupprimerClient();
 
         }
@@ -184,6 +184,9 @@ namespace Serveur_AFKSimulator
 
         public void SupprimerClient()
         {
+            // Attendre que la partie autorise la suppression
+            if (partie != null) { while (partie.verrouClient) { } }
+
             // Vider les listes pouvant contenir le client
             Serveur.clientListe.Remove(this);
             if (Partie.fileAttente.Contains(this)) { Partie.fileAttente.Remove(this); }

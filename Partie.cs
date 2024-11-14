@@ -9,10 +9,10 @@ namespace Serveur_AFKSimulator
     {
         public static List<Partie> listePartie = new List<Partie>();
         public static List<Client> fileAttente = new List<Client>();
-        public const int nbJoueursMin = 5; 
-        public const int nbJoueursMax = 10;
+        public const int nbJoueursMin = 3;
+        public const int nbJoueursMax = 7;
         public const int actualiserIntervalleMs = 50;
-        public const int tempsVictoire = 120;
+        public const int tempsVictoire = 61;
         public const int tempsSupprPartie = 5;
 
         // éléments du jeu
@@ -75,6 +75,11 @@ namespace Serveur_AFKSimulator
                 {
                     listePartie.Add(new Partie());
                 }
+
+                foreach (Client c in fileAttente)
+                {
+                    c.EnvoyerMessage(string.Join(Client.sep2, ["f", fileAttente.Count.ToString()]));
+                }
             }
         }
 
@@ -116,6 +121,7 @@ namespace Serveur_AFKSimulator
 
         public void SupprimerPartie()
         {
+            Console.WriteLine("test");
             verrouClient = true;
             foreach (Client c in listeClient)
             {
@@ -189,7 +195,7 @@ namespace Serveur_AFKSimulator
                         if (j.chrono.Elapsed.TotalSeconds > tempsVictoire) { gagnant = j; break; }
                         j.Actualiser();
 
-                        infosJoueurs += string.Join(Client.sep4, [j.id.ToString(), j.pseudo, j.tempsAfkMs.ToString(), j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur, j.nbProjectiles]) + Client.sep3;
+                        infosJoueurs += string.Join(Client.sep4, [j.id.ToString(), j.pseudo, j.tempsAfkMs.ToString(), j.x.ToString(), j.y.ToString(), j.vie.ToString(), j.couleur, j.nbProjectiles, c.connecte.ToString()]) + Client.sep3;
                     }
                 }
             }
