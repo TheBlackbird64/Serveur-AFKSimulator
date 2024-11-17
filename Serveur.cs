@@ -10,6 +10,7 @@ namespace Serveur_AFKSimulator
         // VARIABLES DE CONFIGURATION DU SERVEUR
         public static int maxConnexions;
         public static int port;
+        public static bool ipv4;
 
         // VARIABLES POUR LE SOCKET (on touche pas, ça a l'air de marcher)
         private static IPAddress? ipAddr; 
@@ -22,9 +23,17 @@ namespace Serveur_AFKSimulator
 
         public static async Task Start()
         {
-            ipAddr = IPAddress.Parse("127.0.0.1"); //IPv6Any; //
+            if (ipv4)
+            {
+                ipAddr = IPAddress.Parse("127.0.0.1");
+                listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            }
+            else
+            {
+                ipAddr = IPAddress.IPv6Any;
+                listener = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            }
             localEndPoint = new IPEndPoint(ipAddr, port);
-            listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp); //AddressFamily.InterNetworkV6
 
             listener.Bind(localEndPoint);
             listener.Listen(maxConnexions);

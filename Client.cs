@@ -88,7 +88,7 @@ namespace Serveur_AFKSimulator
                             }
                             else
                             {
-                                TraiterMessages(msgTab[i].Split(sep2));
+                                TraiterMessagesAsync(msgTab[i].Split(sep2));
                             }
                         }
                     }
@@ -104,13 +104,13 @@ namespace Serveur_AFKSimulator
             }
             while (chrono.Elapsed.TotalSeconds < tempsSupprClient && partie != null);
 
-            
-            SupprimerClient();
+
+            await SupprimerClientAsync();
 
         }
 
 
-        public void TraiterMessages(string[] msg)
+        public async void TraiterMessagesAsync(string[] msg)
         {
             if (msg[0] == "c") // Connexion récupérée (un client s'est déco/reco, il faut le remettre dans l'objet Client ds lequel il est, on retrouve cet objet grace à l'id
             {
@@ -137,7 +137,7 @@ namespace Serveur_AFKSimulator
                     if (trouve)
                     {
                         EnvoyerMessage("c"); // Si trouve continue a marcher comme si de rien était
-                        SupprimerClient();
+                        await SupprimerClientAsync();
                     }
                     else
                     {
@@ -183,10 +183,16 @@ namespace Serveur_AFKSimulator
         }
 
 
-        public void SupprimerClient()
+        public async Task SupprimerClientAsync()
         {
             // Attendre que la partie autorise la suppression
-            if (partie != null) { while (partie.verrouClient) { } }
+            if (partie != null) 
+            { 
+                while (partie.verrouClient)
+                {
+                    await Task.Delay(20);
+                }
+            }
 
             // Vider les listes pouvant contenir le client
             Serveur.clientListe.Remove(this);

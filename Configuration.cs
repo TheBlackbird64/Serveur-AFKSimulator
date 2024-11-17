@@ -15,6 +15,7 @@ namespace Serveur_AFKSimulator
     {
         public int maxConnexions { get; set; }
         public int port { get; set; }
+        public bool ipv4 { get; set; }
     }
 
     public class ConfigPartie
@@ -45,6 +46,10 @@ namespace Serveur_AFKSimulator
     public class Configuration
     {
         public static string nameFile = "config.json";
+        public static string versionConfigStatic = "1.0";
+
+
+        public string versionConfig { get; set; } = "0.0";
 
         // Ajouter un champ du type de chaque classe
         public ConfigReseau configReseau { get; set; } = new();
@@ -53,22 +58,24 @@ namespace Serveur_AFKSimulator
         public ConfigJoueur configJoueur { get; set; } = new();
 
 
+
         public static void LoadConfig()
         {
+            Console.WriteLine("Version requise du fichier de configuration : " + versionConfigStatic + "\n");
 
             if (!File.Exists(nameFile))
             {
                 Console.WriteLine("--> Aucune configuration trouvée. Editer le fichier " + nameFile + ".\n");
                 CreateConfig();
+                Environment.Exit(0);
             }
 
             string json = File.ReadAllText(nameFile);
             Configuration? config = JsonSerializer.Deserialize<Configuration>(json);
 
-            if (config == null)
+            if (config == null || config.versionConfig != versionConfigStatic)
             {
                 Console.WriteLine("--> Erreur de configuration. Editer le fichier " + nameFile + ".\n");
-                config = new Configuration();
                 Environment.Exit(0);
             }
 
@@ -77,6 +84,7 @@ namespace Serveur_AFKSimulator
             // Serveur
             Serveur.maxConnexions = config.configReseau.maxConnexions;
             Serveur.port = config.configReseau.port;
+            Serveur.ipv4 = config.configReseau.ipv4;
 
             // Partie
             Partie.nbJoueursMin = config.configPartie.nbJoueursMin;
@@ -96,12 +104,15 @@ namespace Serveur_AFKSimulator
             Joueur.haut = config.configJoueur.haut;
 
 
+            Console.WriteLine("Réglages serveur: ");
+            Console.Write("- IP");
+            Console.Write(config.configReseau.ipv4 ? "v4" : "v6");
+            Console.WriteLine("\n- Port: " + config.configReseau.port.ToString() + "\n");
         }
 
         public static void CreateConfig()
         {
             Configuration config = new Configuration();
-
             string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(nameFile, json);
         }
