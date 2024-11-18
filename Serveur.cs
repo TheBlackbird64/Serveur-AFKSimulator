@@ -25,7 +25,7 @@ namespace Serveur_AFKSimulator
         {
             if (ipv4)
             {
-                ipAddr = IPAddress.Parse("127.0.0.1");
+                ipAddr = IPAddress.Any;
                 listener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             }
             else
