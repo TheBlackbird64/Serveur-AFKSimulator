@@ -43,7 +43,7 @@ namespace Serveur_AFKSimulator
         public void setTabObstacle(int i, int j, double val)
         {
             tabObstacle[i, j] = val;
-            tabBool[i, j] = tabObstacle[i, j] >= valInf;
+            tabBool[i, j] = val >= valInf;
         }
 
         public double[,] getTabObstacle() => tabObstacle;

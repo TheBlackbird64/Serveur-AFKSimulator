@@ -45,8 +45,20 @@ namespace Serveur_AFKSimulator.Items
 
         public static (int, int) CelluleLibre(bool[,] tab1, bool[,] tab2)
         {
-            int x = 0;
-            int y = 0;
+            /*
+            for (int i = 0; 50 > i; i++) {
+                for (int j = 0; 50 > j; j++)
+                {
+                    Console.Write(tab1[i,j] ? "1" : "0");
+                    Console.Write("  ");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine("\n\n\n\n");
+            */
+
+            int x;
+            int y;
             Random rnd = new Random();
             do
             {
@@ -60,8 +72,8 @@ namespace Serveur_AFKSimulator.Items
 
         public static Item CreerInstances(Type t, Map map, List<Item> liste)
         {
-            int x = 0;
-            int y = 0;
+            int x;
+            int y;
             (x, y) = CelluleLibre(map.tabBool, Item.tabPosItem);
 
             // ligne à dupliquer pour chaque type

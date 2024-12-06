@@ -147,6 +147,7 @@ namespace Serveur_AFKSimulator
             }
             else if (msg[0] == "j") // Jouer (mis en attente pour une partie)
             {
+
                 pseudo = msg[1];
                 if ((!Partie.fileAttente.Contains(this)) && partie == null)
                 {
