@@ -152,6 +152,8 @@ namespace Serveur_AFKSimulator
                 if ((!Partie.fileAttente.Contains(this)) && partie == null)
                 {
                     Partie.fileAttente.Add(this);
+                    // Donner les infos de config.json au client
+                    EnvoyerMessage(string.Join(Client.sep2, ["info", Partie.nbJoueursMin, Partie.actualiserIntervalleMs, Joueur.vieMax]));
                 }
             }
             else if (msg[0] == "r") // Rejouer (aller dans la partie)
