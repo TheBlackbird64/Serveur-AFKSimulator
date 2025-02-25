@@ -9,11 +9,11 @@ namespace Serveur_AFKSimulator.ObjectsMap
 {
     public class Joueur : ElementMove
     {
-        public static int nbProjectilesMax = 10;
-        public static int tempsRechargeMax = 1000;
-        public static int vieMax = 100;
-        public static int larg = 50;
-        public static int haut = 50;
+        public static int nbProjectilesMax;
+        public static int tempsRechargeMax;
+        public static int vieMax;
+        public static int larg;
+        public static int haut;
 
 
         public Partie partie;

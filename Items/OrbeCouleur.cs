@@ -6,7 +6,7 @@ namespace Serveur_AFKSimulator.Items
     public class OrbeCouleur : Item
     {
 
-        private const int valAjoutCouleur = 17;
+        public static int valAjoutCouleur;
         public enum Couleur { Rouge, Vert, Bleu }
         public Couleur col;
 

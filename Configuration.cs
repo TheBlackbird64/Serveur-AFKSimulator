@@ -1,4 +1,5 @@
 ﻿using Serveur_AFKSimulator.ObjectsMap;
+using Serveur_AFKSimulator.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 namespace Serveur_AFKSimulator
 {
 
-    // Classes pour ranger les variables ds le fichier (Par classe, il faut une classe ici avec le nom Config+nomdelaclasse)
+    // Classes pour ranger les variables dans le fichier (Par classe, il faut une classe ici avec le nom Config+nomdelaclasse)
     public class ConfigReseau
     {
         public int maxConnexions { get; set; }
@@ -41,21 +42,27 @@ namespace Serveur_AFKSimulator
         public int haut { get; set; }
     }
 
+    public class ConfigOrbeCouleur
+    {
+        public int valAjoutCouleur { get; set; }
+    }
+
 
 
     public class Configuration
     {
         public static string nameFile = "config.json";
-        public static string versionConfigStatic = "1.0";
+        public static string versionConfigStatic = "1.0.0";
 
 
-        public string versionConfig { get; set; } = "0.0";
+        public string versionConfig { get; set; } = "0.0.0";
 
         // Ajouter un champ du type de chaque classe
         public ConfigReseau configReseau { get; set; } = new();
         public ConfigPartie configPartie { get; set; } = new();
         public ConfigClient configClient { get; set; } = new();
         public ConfigJoueur configJoueur { get; set; } = new();
+        public ConfigOrbeCouleur configOrbeCouleur { get; set; } = new();
 
 
 
@@ -103,6 +110,10 @@ namespace Serveur_AFKSimulator
             Joueur.larg = config.configJoueur.larg;
             Joueur.haut = config.configJoueur.haut;
 
+            // Items
+
+            // orbeCouleur
+            OrbeCouleur.valAjoutCouleur = config.configOrbeCouleur.valAjoutCouleur;
 
             Console.WriteLine("Réglages serveur: ");
             Console.Write("- IP");

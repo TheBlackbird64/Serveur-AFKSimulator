@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Net;
 
 namespace Serveur_AFKSimulator
 {
@@ -11,6 +12,7 @@ namespace Serveur_AFKSimulator
 
             Task t = Serveur.Start();
             t.Wait();
+            
         }
     }
 }
