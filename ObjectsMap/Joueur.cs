@@ -9,12 +9,28 @@ namespace Serveur_AFKSimulator.ObjectsMap
 {
     public class Joueur : ElementMove
     {
+        // ------------------------------ Attributs STATIQUES ------------------------------
+        
+
         public static int nbProjectilesMax;
         public static int tempsRechargeMax;
         public static int vieMax;
         public static int larg;
         public static int haut;
 
+
+        // ------------------------------ Attributs ------------------------------
+
+
+        private bool mouvH { get; set; } = false;
+        private bool mouvB { get; set; } = false;
+        private bool mouvD { get; set; } = false;
+        private bool mouvG { get; set; } = false;
+        private double vitesseH { get; set; } // vitesse horizontale
+        private double vitesseV { get; set; } // vitesse verticale
+        private double acceleration { get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
+        private double deceleration { get; set; } // deceleration du joueur (pour que le mouvement soit fluide)
+        private Stopwatch chronoTempsRecharge { get; set; }
 
         public Partie partie;
 
@@ -26,17 +42,10 @@ namespace Serveur_AFKSimulator.ObjectsMap
         public string couleur { get { return ColToString(colRouge) + ColToString(colVert) + ColToString(colBleu); } }
         public long tempsAfkMs { get { return chrono.ElapsedMilliseconds; } }
         public Stopwatch chrono { get; set; }
-        private Stopwatch chronoTempsRecharge { get; set; }
         public int nbProjectiles { get; set; }
 
-        private bool mouvH { get; set; } = false;
-        private bool mouvB { get; set; } = false;
-        private bool mouvD { get; set; } = false;
-        private bool mouvG { get; set; } = false;
-        private double vitesseH { get; set; } // vitesse verticale
-        private double vitesseV { get; set; } // vitesse horizontale
-        private double acceleration { get; set; } // acceleration du joueur (pour que le mouvement soit fluide)
-        private double deceleration { get; set; } // deceleration du joueur (pour que le mouvement soit fluide)
+
+        // ------------------------------ Méthodes STATIQUES ------------------------------
 
 
         public static string ColToString(int col)
@@ -45,6 +54,9 @@ namespace Serveur_AFKSimulator.ObjectsMap
             if (c.Length == 1) { c = "0" + c; }
             return c;
         }
+
+
+        // ------------------------------ Méthodes ------------------------------
 
 
         public Joueur(Partie partie, int _id, string pseudo) : base(_id, 0, 0, partie.map)
@@ -64,8 +76,8 @@ namespace Serveur_AFKSimulator.ObjectsMap
 
             while (Collision(this, map.tabBool))
             {
-                x = rnd.Next(Map.coinMapG, Map.tailleMap * Map.tailleCellMap);
-                y = rnd.Next(Map.coinMapH, Map.tailleMap * Map.tailleCellMap);
+                x = rnd.Next(Map.coinMapG, Map.coinMapG + Map.tailleMap * Map.tailleCellMap);
+                y = rnd.Next(Map.coinMapH, Map.coinMapH + Map.tailleMap * Map.tailleCellMap);
             }
 
             vitesse = (int) Partie.ValeurSync(5);
@@ -84,7 +96,7 @@ namespace Serveur_AFKSimulator.ObjectsMap
 
         public void TraiterMessages(string[] msg)
         {
-            if (msg[0] == "a") // Actualiser position et éventuellement tir
+            if (msg[0] == "a") // forme du message : ["a", bougeHaut, bougeBas, bougeDroite, bougeGauche, directionTir = -1]   Actualiser position et éventuellement tir
             {
                 bool err = false;
                 int dirProjectile = 0;
@@ -171,13 +183,13 @@ namespace Serveur_AFKSimulator.ObjectsMap
             // On vérifie dans le tableau si un touché, si c'est le cas pour savoir lequel on doit parcourir toute la liste
             if (Collision(this, Item.tabPosItem))
             {
-                for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
+                for (int i = 0; i < partie.gItems.tabTypes.Length; i++)
                 {
-                    for (int j = 0; j < GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]].Count; j++)
+                    for (int j = 0; j < partie.gItems.dictItemInstance[partie.gItems.tabTypes[i]].Count; j++)
                     {
-                        if (Collision(this, GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j]))
+                        if (Collision(this, partie.gItems.dictItemInstance[partie.gItems.tabTypes[i]][j]))
                         {
-                            GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]][j].RecupererItem(this);
+                            partie.gItems.dictItemInstance[partie.gItems.tabTypes[i]][j].RecupererItem(this);
                         }
                     }
                 }

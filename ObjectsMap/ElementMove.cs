@@ -3,17 +3,27 @@
 
 namespace Serveur_AFKSimulator.ObjectsMap
 {
-    // Tout les éléments qui peuvent bouger héritent de cette classe qui contient toutes les fonctions de mouvement.
+    /// <summary>
+    ///     Tout les éléments qui peuvent bouger héritent de cette classe qui contient toutes les fonctions de mouvement.
+    /// </summary>
+    
     public abstract class ElementMove : ElementMap
     {
-        public int vitesse { get; set; } // Vitesse de déplacement
+        // ------------------------------ Attributs ------------------------------
 
+
+        public int vitesse { get; set; } // Vitesse de déplacement
         public int vitRecul { get; set; } // Vitesse de recul
         public int vitRalentiRecul { get; set; } // Ralentissement à chaque actualisation pour que l'objet ne recule pas à l'infini
         public int directionRecul { get; set; } // direction du recul
         public int xPrevious { get; set; } // Valeur de X au mouvement précédente (pr pouvoir annuler un déplacement)
         public int yPrevious { get; set; } // Pareil pr Y
 
+
+        // ------------------------------ Méthodes ------------------------------
+
+
+        // Les fonctions de déplacement déplacent l'instance, et si un obstacle est rencontré la fonction ObstacleTouche() est appelée
 
         public ElementMove(int id, int x, int y, Map map) : base(id, x, y, map)
         {
@@ -27,7 +37,7 @@ namespace Serveur_AFKSimulator.ObjectsMap
         }
 
 
-        // Les fonctions de déplacement déplacent l'instance, et si un obstacle est rencontré la fonction ObstacleTouche() est appelée
+        
 
         public void ResetPrevious()
         {
@@ -35,8 +45,9 @@ namespace Serveur_AFKSimulator.ObjectsMap
             yPrevious = y;
         }
 
-        // L'action à faire en cas de collision est à définir pour chaque classe fille
+        /// <summary> L'action à faire en cas de collision est à définir pour chaque classe fille </summary>
         public abstract void ObstacleTouche();
+
 
         public void Deplacer(double vit, int dir)
         {
@@ -77,7 +88,7 @@ namespace Serveur_AFKSimulator.ObjectsMap
         }
 
 
-        // Initialise un mouvement de recul 
+        /// <summary> Initialise un mouvement de recul </summary>
         public void Recul(int dir)
         {
             vitRecul = (int)Partie.ValeurSync(8);

@@ -9,12 +9,18 @@ namespace Serveur_AFKSimulator.Items
 {
     public class Recharge : Item
     {
-        private const int qteProijectiles = 5;
+        // ------------------------------ Attributs ------------------------------
+
+
+        private const int qteProjectiles = 5;
+
+
+        // ------------------------------ Méthodes ------------------------------
+
 
         public Recharge(int id, int x, int y, Map map) : base(id, x, y, map)
         {
-            largeur = 30;
-            hauteur = 30;
+
         }
 
         public override void Actualiser() { }
@@ -23,9 +29,9 @@ namespace Serveur_AFKSimulator.Items
 
         public override void RecupererItem(Joueur j)
         {
-            if (Joueur.nbProjectilesMax > j.nbProjectiles + qteProijectiles)
+            if (Joueur.nbProjectilesMax > j.nbProjectiles + qteProjectiles)
             {
-                j.nbProjectiles += qteProijectiles;
+                j.nbProjectiles += qteProjectiles;
             }
             else
             {

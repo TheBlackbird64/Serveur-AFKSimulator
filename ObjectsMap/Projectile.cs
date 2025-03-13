@@ -1,11 +1,19 @@
+
+
 namespace Serveur_AFKSimulator.ObjectsMap
 {
     public class Projectile : ElementMove
     {
+        // ------------------------------ Attributs ------------------------------
+
+
         public int idJoueur { get; set; }
         public int direction { get; set; }
         public int degats { get; set; } = 20;
         public Partie partie { get; set; }
+
+
+        // ------------------------------ Méthodes ------------------------------
 
 
         public Projectile(int id, int x, int y, int idJoueur, int direction, Partie partie, Map map) : base(id, x, y, map)
@@ -48,7 +56,7 @@ namespace Serveur_AFKSimulator.ObjectsMap
                     }
                 }
             }
-
         }
+
     }
 }

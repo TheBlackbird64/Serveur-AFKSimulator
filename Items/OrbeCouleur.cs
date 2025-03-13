@@ -5,16 +5,24 @@ namespace Serveur_AFKSimulator.Items
 {
     public class OrbeCouleur : Item
     {
+        // ------------------------------ Attributs STATIQUES ------------------------------
+
 
         public static int valAjoutCouleur;
+
+
+        // ------------------------------ Attributs ------------------------------
+
+
         public enum Couleur { Rouge, Vert, Bleu }
         public Couleur col;
 
+
+        // ------------------------------ Méthodes STATIQUES ------------------------------
+
+
         public OrbeCouleur(int id, int x, int y, Map map) : base(id, x, y, map)
         {
-            largeur = 30;
-            hauteur = 30;
-
 
             Random rnd = new Random();
             switch (rnd.Next(3))

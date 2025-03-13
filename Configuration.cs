@@ -23,9 +23,14 @@ namespace Serveur_AFKSimulator
     {
         public int nbJoueursMin { get; set; }
         public int nbJoueursMax { get; set; }
-        public int actualiserIntervalleMs { get; set; }
+        public int actualiserIntervalle { get; set; }
         public int tempsVictoire { get; set; }
         public int tempsSupprPartie { get; set; }
+
+        public int tpsApparitionOrbeCouleur { get; set; }
+        public int maxItemOrbeCouleur { get; set; }
+        public int tpsApparitionRecharge { get; set; }
+        public int maxItemRecharge { get; set; }
     }
 
     public class ConfigClient
@@ -96,9 +101,14 @@ namespace Serveur_AFKSimulator
             // Partie
             Partie.nbJoueursMin = config.configPartie.nbJoueursMin;
             Partie.nbJoueursMax = config.configPartie.nbJoueursMax;
-            Partie.actualiserIntervalleMs = config.configPartie.actualiserIntervalleMs;
+            Partie.actualiserIntervalle = config.configPartie.actualiserIntervalle;
             Partie.tempsVictoire = config.configPartie.tempsVictoire;
             Partie.tempsSupprPartie = config.configPartie.tempsSupprPartie;
+
+            Partie.tpsApparitionOrbeCouleur = config.configPartie.tpsApparitionOrbeCouleur;
+            Partie.maxItemOrbeCouleur = config.configPartie.maxItemOrbeCouleur;
+            Partie.tpsApparitionRecharge = config.configPartie.tpsApparitionRecharge;
+            Partie.maxItemRecharge = config.configPartie.maxItemRecharge;
 
             // Client
             Client.tempsSupprClient = config.configClient.tempsSupprClient;

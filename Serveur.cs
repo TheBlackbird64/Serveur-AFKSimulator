@@ -7,6 +7,9 @@ namespace Serveur_AFKSimulator
 {
     public static class Serveur
     {
+        // ------------------------------ Attributs STATIQUES ------------------------------
+
+
         // VARIABLES DE CONFIGURATION DU SERVEUR
         public static int maxConnexions;
         public static int port;
@@ -20,6 +23,8 @@ namespace Serveur_AFKSimulator
         // VARIABLES AUTRES
         public static List<Client> clientListe { get; set; } = new List<Client>();
 
+
+        // ------------------------------ Méthodes STATIQUES ------------------------------
 
         public static async Task Start()
         {
@@ -50,6 +55,11 @@ namespace Serveur_AFKSimulator
 
                 cli.RecMessagesAsync();
             }
+        }
+
+        public static void Log(string msg)
+        {
+            Console.WriteLine(DateTime.Now.ToString() + "  :  " +  msg);
         }
     }
 }

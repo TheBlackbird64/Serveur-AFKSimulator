@@ -6,16 +6,27 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Serveur_AFKSimulator.ObjectsMap;
+using Serveur_AFKSimulator.Items;
 
 namespace Serveur_AFKSimulator
 {
     public class Client : Identification
     {
+
+        // ------------------------------ Attributs STATIQUES ------------------------------
+
+        public static int tempsSupprClient;
+
+
+        // ------------------------------ Attributs ------------------------------
+
+
         // VARIABLES RESEAU
         private Socket sock;
+        private bool sockAFermer = true;
         private string msgpart = "";
         public bool connecte { get; set; } = true;
-        public static int tempsSupprClient;
+        
 
         // SEPARATEURS MESSAGES RESEAU
         public const string sep1 = "|";
@@ -24,12 +35,14 @@ namespace Serveur_AFKSimulator
         public const string sep4 = "!";
 
         // VARIABLES FONCTIONNEMENT
+        private string pseudo;
         public Partie? partie {  get; set; }
         public Joueur? joueur { get; set; }
         public Stopwatch chrono { get; set; }
-        private string pseudo;
 
-        
+
+        // ------------------------------ Méthodes ------------------------------
+
 
         public Client(Socket socket, int _id)
         {
@@ -38,8 +51,13 @@ namespace Serveur_AFKSimulator
             id = _id;
             pseudo = "";
 
-            Log("Client connecté");
+            Log(" + Client connecté");
         }
+
+        ~Client() {
+            Log("--- Client supprimé");
+        }
+
 
         public async void RecMessagesAsync()
         {
@@ -67,7 +85,7 @@ namespace Serveur_AFKSimulator
                             }
                             else
                             {
-                                Log("Client deconnecte");
+                                Log(" > Client deconnecte");
                                 connecte = false;
                             }
                         }
@@ -94,25 +112,25 @@ namespace Serveur_AFKSimulator
                     }
                     catch (Exception e)
                     {
-                        Log("Client deconnecte suite a une erreur: " + e.Message);
+                        Log(" > Client deconnecte suite a une erreur: " + e.Message);
                         connecte = false;
                     }
                 }
 
 
                 if (! chrono.IsRunning) { chrono.Start(); }
-            }
-            while (chrono.Elapsed.TotalSeconds < tempsSupprClient && partie != null);
 
+                await Task.Delay(10);
+            }
+            while (chrono.ElapsedMilliseconds < tempsSupprClient);
 
             await SupprimerClientAsync();
-
         }
 
 
         public async void TraiterMessagesAsync(string[] msg)
         {
-            if (msg[0] == "c") // Connexion récupérée (un client s'est déco/reco, il faut le remettre dans l'objet Client ds lequel il est, on retrouve cet objet grace à l'id
+            if (msg[0] == "c") //  forme du message : ["c"]  Connexion récupérée (un client s'est déco/reco, il faut le remettre dans l'objet Client ds lequel il est, on retrouve cet objet grace à l'id
             {
                 bool err = false;
                 int _id = -1;
@@ -122,15 +140,19 @@ namespace Serveur_AFKSimulator
                 }
                 catch { err = true; }
 
-                if (! err)
+                if (!err)
                 {
                     bool trouve = false;
                     foreach (Client c in Serveur.clientListe)
                     {
-                        if (! c.connecte && c.id == _id)
+                        if (!c.connecte && c.id == _id)
                         {
                             c.sock = sock;
+                            sockAFermer = false;
+
                             c.connecte = true;
+                            trouve = true;
+                            break;
                         }
                     }
 
@@ -145,7 +167,7 @@ namespace Serveur_AFKSimulator
                     }
                 }
             }
-            else if (msg[0] == "j") // Jouer (mis en attente pour une partie)
+            else if (msg[0] == "j") // forme du message : ["j", pseudo]    Jouer (mis en attente pour une partie)
             {
 
                 pseudo = msg[1];
@@ -153,10 +175,10 @@ namespace Serveur_AFKSimulator
                 {
                     Partie.fileAttente.Add(this);
                     // Donner les infos de config.json au client
-                    EnvoyerMessage(string.Join(Client.sep2, ["info", Partie.nbJoueursMin, Partie.actualiserIntervalleMs, Joueur.vieMax]));
+                    EnvoyerMessage(string.Join(Client.sep2, ["info", Partie.nbJoueursMin, Partie.actualiserIntervalle, Joueur.vieMax, OrbeCouleur.valAjoutCouleur]));
                 }
             }
-            else if (msg[0] == "r") // Rejouer (aller dans la partie)
+            else if (msg[0] == "r") //  forme du message : ["r"]  Rejouer (aller dans la partie)
             {
                 if (partie != null)
                 {
@@ -171,6 +193,7 @@ namespace Serveur_AFKSimulator
                 }
             }
         }
+
 
         public void EnvoyerMessage(string msg)
         {
@@ -205,13 +228,13 @@ namespace Serveur_AFKSimulator
                 if (partie.listeClient.Contains(this)) { partie.listeClient.Remove(this); } 
             }
 
-            sock.Close();
+            if (sockAFermer) { sock.Close(); }
         }
 
-        // Affichage serveur
+
         public void Log(string msg)
         {
-            Console.WriteLine("  " + msg + " (id:" + id.ToString() + ")");
+            Serveur.Log("  " + msg + " (id:" + id.ToString() + ")");
         }
     }
 }

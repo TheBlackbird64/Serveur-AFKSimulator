@@ -1,7 +1,15 @@
+
+
 namespace Serveur_AFKSimulator.ObjectsMap
 {
+    /// <summary> 
+    ///     Tout les éléments qui sont sur la carte héritent de cette classe. Elle contient principalement différentes fonctions de collisions. 
+    /// </summary>
     public abstract class ElementMap : Identification
     {
+        // ------------------------------ Attributs ------------------------------
+
+
         public int x { get; set; }
         public int y { get; set; }
         public int largeur { get; set; }
@@ -10,7 +18,9 @@ namespace Serveur_AFKSimulator.ObjectsMap
         public Map map { get; set; }
 
 
-        // Tout les éléments qui sont sur la carte héritent de cette classe. Elle contient principalement différentes fonctions de collisions.
+        // ------------------------------ Méthodes ------------------------------
+
+        
         public ElementMap(int id, int x, int y, Map map)
         {
             // Toutes les coordonnées partent d'en haut à droite du sprite de l'objet
@@ -65,7 +75,7 @@ namespace Serveur_AFKSimulator.ObjectsMap
 
         }
 
-        // Fonction appelé à chaque étape du jeu pour actualiser les éléments (collisions, déplacements, ...)
+        /// <summary> Fonction appelé à chaque étape du jeu pour actualiser les éléments (collisions, déplacements, ...) </summary> 
         public abstract void Actualiser();
     }
 

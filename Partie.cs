@@ -3,39 +3,59 @@
 using System.Diagnostics;
 using Serveur_AFKSimulator.Items;
 using Serveur_AFKSimulator.ObjectsMap;
+using static Serveur_AFKSimulator.Items.GestionnaireItem;
 
 namespace Serveur_AFKSimulator
 {
     public class Partie
     {
+        // ------------------------------ Attributs STATIQUES ------------------------------
+
         public static List<Partie> listePartie = new List<Partie>();
         public static List<Client> fileAttente = new List<Client>();
         public static int nbJoueursMin;
         public static int nbJoueursMax;
-        public static int actualiserIntervalleMs;
+        public static int actualiserIntervalle;
         public static int tempsVictoire;
         public static int tempsSupprPartie;
+        
+        // Caractéristiques des items
+        public static int tpsApparitionOrbeCouleur;
+        public static int maxItemOrbeCouleur;
 
-        // éléments du jeu
+        public static int tpsApparitionRecharge;
+        public static int maxItemRecharge;
+
+
+        // ------------------------------ Attributs ------------------------------
+
+
+
+        // Listes d'éléments à garder pour la partie
         public List<Client> listeClient { get; set; }
-        public bool verrouClient { get; set; } = false; // Pour éviter qu'un client soit supprimé pendant que la partie s'actualise, ce qui ferait planter le serveur
         public List<Projectile> listeProjectile { get; set; }
+
+        // éléments de la partie
+        public GestionnaireItem gItems { get; set; }
         public Stopwatch chrono { get; set; }
         public Map map { get; set; }
-
         public int nbJoueurs { get { return listeClient.Count; } }
         public int graine { get; set; }
         public bool suppr = false;
         public bool started { get; set; }
+        public bool verrouClient { get; set; } = false; // Pour éviter qu'un client soit supprimé pendant que la partie s'actualise, ce qui ferait planter le serveur
         public Random rnd = new Random();
 
 
-        // Boucle asynchrone qui place les joueurs de la file d'attente dans les parties incompletes, crée les parties si nécéssaire et actualise les parties existantes.
+        // ------------------------------ Méthodes STATIQUES ------------------------------
+
+
+        /// <summary> Boucle asynchrone qui place les joueurs de la file d'attente dans les parties incompletes, crée les parties si nécéssaire et actualise les parties existantes. </summary>
         public static async void ActualiserPartiesAsync()
         {
             while (true)
             {
-                await Task.Delay(actualiserIntervalleMs);
+                await Task.Delay(actualiserIntervalle);
 
                 foreach (Partie p in new List<Partie>(listePartie))
                 {
@@ -61,7 +81,7 @@ namespace Serveur_AFKSimulator
                         if ((p.listeClient.Count >= nbJoueursMin) && !p.started)
                         {
                             p.started = true;
-                            Console.WriteLine("-- Partie démarrée (" + listePartie.Count + " parties en cours)");
+                            Serveur.Log(" > Partie démarrée (" + listePartie.Count + " parties en cours)");
 
                             foreach (Client c in p.listeClient)
                             {
@@ -77,14 +97,15 @@ namespace Serveur_AFKSimulator
                     listePartie.Add(new Partie());
                 }
 
-                foreach (Client c in fileAttente)
+                foreach (Client c in new List<Client> (fileAttente))
                 {
                     c.EnvoyerMessage(string.Join(Client.sep2, ["f", fileAttente.Count.ToString()]));
                 }
             }
         }
 
-        // Supprimer les éléments qui ne servent plus dans une liste d'éléments de la map
+
+        /// <summary>  Supprimer les éléments qui ne servent plus dans une liste d'éléments de la map </summary>
         public static void SupprimerElementsMap<T>(List<T> Elem) where T : ElementMap
         {
             foreach (T e in new List<T>(Elem))
@@ -94,12 +115,17 @@ namespace Serveur_AFKSimulator
         }
 
         
-        public static double ValeurSync(double valPar10Ms) => valPar10Ms * (actualiserIntervalleMs / 10);
+        public static double ValeurSync(double valPar10Ms) => valPar10Ms * (actualiserIntervalle / 10);
+
+
+
+        // ------------------------------ Méthodes ------------------------------
+
 
 
         public Partie()
         {
-            Console.WriteLine("Partie créée");
+            Serveur.Log(" + Partie créée");
 
             listeClient = new List<Client>();
             listeProjectile = new List<Projectile>();
@@ -112,13 +138,17 @@ namespace Serveur_AFKSimulator
             map.GenTab();
             map.setTabObstacle(map.GenLisserTab(map.getTabObstacle(), 2));
 
-            if (! GestionnaireItem.initialise) { GestionnaireItem.Initialiser(); }
+            gItems = new GestionnaireItem(
+                [typeof(OrbeCouleur), typeof(Recharge)], 
+                [new DataItems(tpsApparitionOrbeCouleur, maxItemOrbeCouleur, new Stopwatch()), new DataItems(tpsApparitionRecharge, maxItemRecharge, new Stopwatch())]);
         }
+
 
         ~Partie()
         {
-            Console.WriteLine("Partie supprimée");
+            Serveur.Log(" --- Partie supprimée");
         }
+
 
         public void SupprimerPartie()
         {
@@ -126,6 +156,7 @@ namespace Serveur_AFKSimulator
             foreach (Client c in listeClient)
             {
                 c.partie = null;
+                c.joueur = null;
             }
             verrouClient = false;
 
@@ -134,7 +165,8 @@ namespace Serveur_AFKSimulator
             suppr = true;
         }
 
-        // Commence une partie, prévient les clients du début de la partie
+
+        /// <summary>  Commence une partie, prévient les clients du début de la partie </summary>
         public void StartClient(Client c)
         {
             c.partie = this;
@@ -142,7 +174,7 @@ namespace Serveur_AFKSimulator
         }
 
 
-        // Actualisation de toute la map (positions, vies, ..)
+        /// <summary>   Actualisation de toute la map (positions, vies, ..) </summary>
         public void Actualiser()
         {
             verrouClient = true;
@@ -150,11 +182,11 @@ namespace Serveur_AFKSimulator
             // Items 
             string infosItems = "";
             List<string> infosItemsTab = new List<string>();
-            for (int i = 0; i < GestionnaireItem.tabTypes.Length; i++)
+            for (int i = 0; i < gItems.tabTypes.Length; i++)
             {
-                SupprimerElementsMap(GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]]);
+                SupprimerElementsMap(gItems.dictItemInstance[gItems.tabTypes[i]]);
 
-                foreach (Item It in GestionnaireItem.dictItemInstance[GestionnaireItem.tabTypes[i]])
+                foreach (Item It in gItems.dictItemInstance[gItems.tabTypes[i]])
                 {
                     infosItems += It.InfosItem();
                 }
@@ -165,7 +197,7 @@ namespace Serveur_AFKSimulator
             }
             infosItems = string.Join(Client.sep2, infosItemsTab);
 
-            GestionnaireItem.Actualiser(map);
+            gItems.Actualiser(map);
 
 
             // Actualisation des projectiles 
@@ -219,7 +251,7 @@ namespace Serveur_AFKSimulator
                     c.joueur = null;
                 }
 
-                Console.WriteLine("Partie terminée (id gagnant : " + gagnant.id.ToString() + " )");
+                Serveur.Log(" > Partie terminée (id gagnant : " + gagnant.id.ToString() + " )");
 
                 SupprimerPartie();
             }
@@ -233,7 +265,7 @@ namespace Serveur_AFKSimulator
             else
             {
                 if (listeClient.Count != 0) { chrono.Stop(); }
-                if (chrono.Elapsed.TotalSeconds > tempsSupprPartie)
+                if (chrono.ElapsedMilliseconds > tempsSupprPartie)
                 {
                     SupprimerPartie();
                 }

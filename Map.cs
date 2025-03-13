@@ -3,24 +3,44 @@ namespace Serveur_AFKSimulator
 {
     public class Map
     {
+        // ------------------------------ Attributs ------------------------------
+
+
         public long valRnd { get; set; }
 
-        // Valeur de la carte 
+        // constantes de la carte 
         public const int coinMapH = 250;
         public const int coinMapG = 250;
         public const int tailleMap = 50;
         public const int tailleCellMap = 50;
 
-        // Valeurs de génération
+        // constantes de génération
         public const double valInf = 0.6;
         public const int nbVoisins = 3;
         public const int nbDec = 3;
+
+        // Tableaux 
         private double[,] tabObstacle = new double[tailleMap, tailleMap];
         public bool[,] tabBool = new bool[tailleMap, tailleMap];
 
-        // Convertit une coordonnée x en indice de ligne de tableau de taille tailleMap.
+
+        // ------------------------------ Méthodes STATIQUES ------------------------------
+
+
+        /// <summary> Convertit une coordonnée x en indice de ligne de tableau de taille tailleMap. </summary>
         public static int XToRow(int x) => Convert.ToInt32(Math.Floor(((double) (x - coinMapG)) / ((double) tailleCellMap)));
+
+        /// <summary> Convertit une coordonnée y en indice de ligne de tableau de taille tailleMap. </summary>
         public static int YToRow(int y) => Convert.ToInt32(Math.Floor(((double) (y - coinMapG)) / ((double) tailleCellMap)));
+
+        /// <summary> Convertit un indice de ligne de tableau de taille tailleMap en une coordonnée x. </summary>
+        public static int RowToX(int x) => tailleCellMap * x + coinMapG;
+
+        /// <summary> Convertit un indice de ligne de tableau de taille tailleMap en une coordonnée y. </summary>
+        public static int RowToY(int y) => tailleCellMap * y + coinMapH;
+
+
+        // ------------------------------ Méthodes ------------------------------
 
 
         public Map(int graine)
@@ -50,7 +70,8 @@ namespace Serveur_AFKSimulator
 
 
         // Fonctions de generation de la map
-        // Générateur congruentiel linéaire
+
+        /// <summary> Générateur congruentiel linéaire </summary>
         public long GenRnd()
         {
             valRnd = (long)((16807 * valRnd + 1) % Math.Pow(2, 32));

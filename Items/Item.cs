@@ -2,14 +2,30 @@ using Serveur_AFKSimulator.ObjectsMap;
 
 namespace Serveur_AFKSimulator.Items
 {
-    // Pour chaque classe fille de Item, configurer parametres dans le gestionnaire d'item (arrays)
+    /// <summary>
+    ///     
+    /// </summary>
     public abstract class Item : ElementMap
     {
+        // ------------------------------ Attributs STATIQUES ------------------------------
+
+
         public static bool[,] tabPosItem = new bool[Map.tailleMap, Map.tailleMap];
 
-        public Item(int id, int x, int y, Map map) : base(id, x * Map.tailleCellMap + Map.coinMapG, y * Map.tailleCellMap + Map.coinMapH, map)
+
+        // ------------------------------ Méthodes ------------------------------
+
+
+        public Item(int id, int x, int y, Map map, int largeur = 30, int hauteur = 30) : base(id, Map.RowToX(x), Map.RowToY(y), map)
         {
             tabPosItem[x, y] = true;
+
+            this.largeur = largeur;
+            this.hauteur = hauteur;
+
+            // Pour aligner l'item au centre de la cellule
+            this.x += (Map.tailleCellMap - largeur) / 2;
+            this.y += (Map.tailleCellMap - hauteur) / 2;
         }
 
         ~Item()
